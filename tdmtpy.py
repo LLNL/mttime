@@ -4,7 +4,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Python module for Time Domain Moment Tensor Inversion (tdmtpy)
+Python module for Time Domain Moment Tensor Inversion (tdmtpy), Version: 0.1
 
 Last updated on February 11, 2020
 
@@ -44,11 +44,8 @@ GFs - [NAME].[DEPTH].[GF_NAME]
 		NAME = station name in inputfile
 		DEPTH = source depth with four significant digits
 		COMPONENTS = t, r, z
-		GF_NAME = herrmann format has 10: tss tds rss rds rdd zss zds zdd rex zex
-				  e.g. BK.CMB.00.10.0000.zds
-				  tensor format has 18 (if using all three components): xx, yy, zz, xy, xz, yz
-
-				  e.g. BK.CMB.00.10.0000.zxy
+		GF_NAME = herrmann format has 10: tss tds rss rds rdd zss zds zdd rex zex, e.g. BK.CMB.00.10.0000.zds
+			  tensor format has 18 (if using all three components): xx, yy, zz, xy, xz, yz, e.g. BK.CMB.00.10.0000.zxy
 4. Two output files are created "mtinv.out" and "max.mtinv.out" after running the code.
 	mtinv.out = moment tensor depth search results, best solution on the second line (after header)
 	max.mtinv.out = best solution with the highest VR, includes additional station information
