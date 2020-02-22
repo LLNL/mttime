@@ -36,7 +36,7 @@ NC.AFD.     143  29 30 150 1.0  1      bp 2 2 0.05 0.1  gil7  -120.968971 38.945
      - Components: t, r or z
      - Examples: BK.CMB.00.z.dat, BK.CMB.00.t.dat
     
-   - Green's Functions: [name].[depth.[GF_name]
+   - Green's Functions: [name].[depth].[GF_name]
      - Name: station name in input file, same as data file name
      - Depth: source depth with four significant digits
      - Components: t, r or z
