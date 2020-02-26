@@ -2,7 +2,7 @@
 tdmtpy is a software tool developed for time domain inversion of complete seismic waveform data to obtain the seismic moment tensor. It supports both deviatoric and full moment tensor inversions as well as 1-D and 3-D basis Green's functions.
 
 ### Usage
-1. Run tdmtpy from command line. If no input file is specified code will look for default input file **./mtinv.in**.
+1. Run tdmtpy from command line. If no input file is specified code will look for default input file **./mtinv.in**
 ```
 python -m tdmtpy
 python -m tdmtpy your_input_file
