@@ -1,10 +1,8 @@
 
-.. raw:: html
+tdmtpy
+======
 
-   <h1 class="card-title">tdmtpy<br>
-   <small>Time Domain Moment Tensor Inversion in Python</small></h1>
-
-tdmtpy is a python package developed for time domain inversion of complete seismic waveform data
+tdmtpy (Time Domain Moment Tensor Inversion in Python) is a python package developed for time domain inversion of complete seismic waveform data
 to obtain the seismic moment tensor. It supports deviatoric and full moment tensor inversions,
 and 1-D and 3-D basis Green's functions.
 
@@ -81,6 +79,6 @@ License
 -------
 `tdmtpy` is distributed under the terms of LGPL-3.0 license. All new contributions must be made under the LGPL-3.0 license.
 
-SPDX-License-Identifier: (BSD-3)
+SPDX-License-Identifier: (LGPL-3.0)
 
 LLNL-CODE-814839
