@@ -69,7 +69,7 @@ The equivalent in the Python console:
    mt.invert()
    mt.write()
 
-Refer to the :ref:`user_guide` for more details.
+Refer to the `User Guide <https://github.com/LLNL/tdmtpy/wiki/User-Guide>`_ for more details.
 
 Tutorials
 ---------
