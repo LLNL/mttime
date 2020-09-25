@@ -79,6 +79,6 @@ License
 -------
 `tdmtpy` is distributed under the terms of LGPL-3.0 license. All new contributions must be made under the LGPL-3.0 license.
 
-SPDX-License-Identifier: (LGPL-3.0)
+SPDX-License-Identifier: LGPL-3.0
 
 LLNL-CODE-814839
