@@ -1,0 +1,17 @@
+origin         2019-07-16T20:10:31.473
+longitude      -121.757
+latitude       37.8187
+depth          10,20
+path_to_data   dc
+path_to_green  gf
+green          herrmann
+components     ZRT
+degree         5
+weight         distance
+plot           1
+correlate      0
+station distance azimuth ts npts dt used longitude latitude filter nc np lcrn hcrn model
+BK.FARB.00 110      263 30 100 1.0 0	-123.0011  37.6978  bp 2 2 0.05 0.1  gil7
+BK.SAO.00  120      167 30 150 1.0 001	-121.4472  36.7640  bp 2 2 0.05 0.1  gil7
+BK.CMB.00  123      78  30 150 1.0 0	-120.3865  38.0346  bp 2 2 0.05 0.1  gil7
+BK.MNRC.00 132      333 30 150 1.0 1	-122.4428  38.8787  bp 2 2 0.05 0.1  gil7
