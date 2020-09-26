@@ -1,3 +1,0 @@
-[console_scripts]
-tdmtpy-run = tdmtpy.scripts.run:main
-
