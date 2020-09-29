@@ -60,3 +60,4 @@ var/
 
 # Sphinx documentation
 doc/build/
+doc/_exclude/
