@@ -508,15 +508,13 @@ class Inversion(object):
             and waveform fits. ``depth`` shows the focal mechanism and moment magnitude as a
             function of depth.
         :type view: str
-        :param show: If ``True`` will show the plot interactively after plotting, defaults is ``False``.
+        :param show: If ``True`` will show the plot interactively after plotting, default is ``False``.
         :type show: bool
         :param format: figure file format, default is ``"eps"``.
         :type format: str
         :param option: Additional parameter if view is set to ``normal``. The default plots all
             solutions. Set to ``preferred`` to plot only the preferred solution.
         :type option: str, optional
-
-        .. rubric:: Example
 
         """
         view = kwargs.get("view", "normal")
