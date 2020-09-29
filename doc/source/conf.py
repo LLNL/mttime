@@ -69,7 +69,7 @@ exclude_patterns = []
 source_suffix = '.rst'
 
 # The master toctree document.
-#master_doc = 'contents'
+master_doc = 'index'
 
 # The encoding of source files.
 #source_encoding = 'utf-8'
