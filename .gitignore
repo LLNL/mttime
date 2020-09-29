@@ -59,6 +59,6 @@ var/
 *.egg
 
 # Sphinx documentation
-doc/build/
-doc/_exclude/
-doc/source/reference/autogen
+docs/build/
+docs/_exclude/
+docs/source/reference/autogen
