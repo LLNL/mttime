@@ -24,10 +24,6 @@ from obspy.imaging.scripts.mopad import BeachBall as mopad_BeachBall
 from obspy.imaging.scripts.mopad import MomentTensor as mopad_MomentTensor
 from obspy.imaging.scripts.mopad import epsilon
 
-from obspy.geodetics.base import kilometers2degrees
-import cartopy.crs as ccrs
-import cartopy.io.img_tiles as cimgt
-
 
 def new_page(nsta,nrows,ncols,annot="",offset=2,figsize=(8.5,11)):
     """

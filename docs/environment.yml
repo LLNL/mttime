@@ -1,0 +1,8 @@
+name: tdmtpy_docs
+dependencies:
+  - python=3.8
+  - obspy
+  - pandas
+  - sphinx_rtd_theme
+  - sphinx
+prefix: /Users/chiang4/miniconda3/envs/tdmtpy_docs
