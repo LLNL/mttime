@@ -1,0 +1,727 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tdmtpy.tensor &mdash; tdmtpy 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/OS-icon-color.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/OS-logo-horizontal-white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tdmtpy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>tdmtpy.tensor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tdmtpy.tensor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># SPDX-License-Identifier: (LGPL-3.0)</span>
+<span class="c1"># LLNL-CODE-814839</span>
+<span class="c1"># author: Andrea Chiang (andrea4@llnl.gov)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Routines for handling inversion results</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">obspy.core.util</span> <span class="kn">import</span> <span class="n">AttribDict</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">.image</span> <span class="kn">import</span> <span class="n">new_page</span><span class="p">,</span> <span class="n">beach</span>
+
+
+<div class="viewcode-block" id="find_strike_rake_dip"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.tensor.find_strike_rake_dip.html#tdmtpy.tensor.find_strike_rake_dip">[docs]</a><span class="k">def</span> <span class="nf">find_strike_rake_dip</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute strike,rake and dip</span>
+
+<span class="sd">    A function that returns the strike, rake and dip of given slip</span>
+<span class="sd">    and fault normal vectors.</span>
+
+<span class="sd">    :param u: slip vector.</span>
+<span class="sd">    :type u: :class:`~numpy.ndarray`</span>
+<span class="sd">    :param n: fault normal vector.</span>
+<span class="sd">    :type n: :class:`~numpy.ndarray`</span>
+<span class="sd">    :return: strike, rake and dip of a fault plane.</span>
+<span class="sd">    :rtype: (float, float, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">strike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="c1"># Determine the quadrant</span>
+    <span class="k">if</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">strike</span> <span class="o">=</span> <span class="mi">180</span><span class="o">-</span><span class="n">strike</span>
+
+    <span class="n">rake</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">dip</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">))</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">cos_rake</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">strike</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span><span class="o">+</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">strike</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cos_rake</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">rake</span> <span class="o">=</span> <span class="mi">180</span><span class="o">-</span><span class="n">rake</span>
+    <span class="k">if</span> <span class="n">strike</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">strike</span> <span class="o">=</span> <span class="n">strike</span><span class="o">+</span><span class="mi">360</span>
+
+    <span class="k">if</span> <span class="n">rake</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">:</span>
+        <span class="n">rake</span> <span class="o">=</span> <span class="n">rake</span><span class="o">+</span><span class="mi">360</span>
+    <span class="k">if</span> <span class="n">rake</span> <span class="o">&gt;</span> <span class="mi">180</span><span class="p">:</span>
+        <span class="n">rake</span> <span class="o">=</span> <span class="n">rake</span><span class="o">-</span><span class="mi">360</span>
+        
+    <span class="k">return</span> <span class="p">(</span><span class="n">strike</span><span class="p">,</span><span class="n">rake</span><span class="p">,</span><span class="n">dip</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="find_fault_planes"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.tensor.find_fault_planes.html#tdmtpy.tensor.find_fault_planes">[docs]</a><span class="k">def</span> <span class="nf">find_fault_planes</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">M_dc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute direction of slip and orientation of fault planes</span>
+
+<span class="sd">    Function that returns slip direction and orientation of fault plane</span>
+<span class="sd">    and auxiliary plane.</span>
+
+<span class="sd">    :param M: moment tensor in matrix form.</span>
+<span class="sd">    :type M: :class:`~numpy.ndarray`</span>
+<span class="sd">    :param M_dc: double-couple moment tensor in matrix form.</span>
+<span class="sd">    :type M_dc: :class:`~numpy.ndarray`</span>
+<span class="sd">    :return: direction of slip and orientation of the fault plane</span>
+<span class="sd">        and auxiliary plane.</span>
+<span class="sd">    :rtype: list((float, float, float), (float, float, float))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">eigVal</span><span class="p">,</span> <span class="n">eigVec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">M_dc</span><span class="p">)</span>
+        
+    <span class="c1"># sort in ascending order:</span>
+    <span class="n">dc_eigvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">eigVec</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">eigVal</span><span class="p">),</span><span class="mi">1</span><span class="p">))</span>
+        
+    <span class="c1"># Principal axes:</span>
+    <span class="c1">#n = dc_eigvec[:,1]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">dc_eigvec</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">dc_eigvec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># str/rake/dip for plane-1</span>
+    <span class="n">u1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="n">p</span><span class="p">)</span> <span class="c1"># slip vector</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">t</span><span class="p">)</span> <span class="c1"># fault normal</span>
+        
+    <span class="c1"># u,n calculations from Vavrycuk (2015) angles.m</span>
+    <span class="k">if</span> <span class="n">u1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># vertical component is always negative!</span>
+        <span class="n">u1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">u1</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">u1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">M</span><span class="p">),</span><span class="n">n1</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">M</span><span class="p">),</span><span class="n">u1</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">n1</span>
+    <span class="n">str1</span><span class="p">,</span><span class="n">rake1</span><span class="p">,</span><span class="n">dip1</span> <span class="o">=</span> <span class="n">find_strike_rake_dip</span><span class="p">(</span><span class="n">u1</span><span class="p">,</span><span class="n">n1</span><span class="p">)</span>
+            
+    <span class="c1"># str/rake/dip for plane-2</span>
+    <span class="n">u2</span> <span class="o">=</span> <span class="n">n1</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">u1</span>
+    <span class="k">if</span> <span class="n">u2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># vertical component is always negative!</span>
+        <span class="n">u2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">u2</span>
+        <span class="n">n2</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">n2</span>
+    <span class="n">str2</span><span class="p">,</span><span class="n">rake2</span><span class="p">,</span><span class="n">dip2</span> <span class="o">=</span> <span class="n">find_strike_rake_dip</span><span class="p">(</span><span class="n">u2</span><span class="p">,</span><span class="n">n2</span><span class="p">)</span>
+        
+    <span class="c1">#null_axis = dc_eigvec[:,1]</span>
+    <span class="c1">#t_axis = t</span>
+    <span class="c1">#p_axis = p</span>
+    
+    <span class="k">return</span> <span class="p">(</span> <span class="p">[(</span><span class="n">str1</span><span class="p">,</span><span class="n">dip1</span><span class="p">,</span><span class="n">rake1</span><span class="p">),(</span><span class="n">str2</span><span class="p">,</span><span class="n">dip2</span><span class="p">,</span><span class="n">rake2</span><span class="p">)]</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="eigen2lune"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.tensor.eigen2lune.html#tdmtpy.tensor.eigen2lune">[docs]</a><span class="k">def</span> <span class="nf">eigen2lune</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate source-type parameters on a lune</span>
+
+<span class="sd">    A function that calculates the source-type parameters gamma and delta</span>
+<span class="sd">    based on the formulation of Tape and Tape, (2012).</span>
+
+<span class="sd">    :param lam: eigenvalues in descending order.</span>
+<span class="sd">    :type lam: :class:`~numpy.ndarray`</span>
+<span class="sd">    :return: lune coordinates gamma and delta.</span>
+<span class="sd">    :rtype: (float, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lambda_mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">lam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">lam</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">bdot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">lambda_mag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bdot</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">bdot</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">bdot</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">bdot</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="mi">90</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">bdot</span><span class="p">)</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="mf">0.</span>
+            
+    <span class="k">if</span> <span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">lam</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+        <span class="n">gamma</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">((</span><span class="o">-</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">lam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lam</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">lam</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        
+    <span class="k">return</span> <span class="p">(</span><span class="n">gamma</span><span class="p">,</span><span class="n">delta</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Tensor"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.tensor.Tensor.html#tdmtpy.tensor.Tensor">[docs]</a><span class="k">class</span> <span class="nc">Tensor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Object containing a single six-element moment tensor</span>
+
+<span class="sd">    A container for all things related to the moment tensor ``m``.</span>
+<span class="sd">    Optional ``**kwargs`` are used to write and plot inversion results.</span>
+
+<span class="sd">    :param m: six independent moment tensor elements in Aki and Richards (2002) convention:</span>
+<span class="sd">        mxx, myy, mzz, mxy, mxz, myz. Units are in dyne-cm.</span>
+<span class="sd">    :type m: :class:`~numpy.ndarray`</span>
+<span class="sd">    :param depth: source depth.</span>
+<span class="sd">    :type depth: float</span>
+<span class="sd">    :param ts: data shift in the number of time points.</span>
+<span class="sd">    :type ts: int</span>
+<span class="sd">    :param weights: station weights.</span>
+<span class="sd">    :type weights: :class:`~numpy.ndarray`</span>
+<span class="sd">    :param station_VR: variance reduction at each station.</span>
+<span class="sd">    :type station_VR: :class:`~numpy.ndarray`</span>
+<span class="sd">    :param total_VR: total variance reduction.</span>
+<span class="sd">    :type total_VR: float</span>
+<span class="sd">    :param dd: observed data stored as a single vector, required for plotting.</span>
+<span class="sd">    :type dd: :class:`~numpy.ndarray`</span>
+<span class="sd">    :param ss: synthetic seismograms stored as a single vector, required for plotting.</span>
+<span class="sd">    :type ss: :class:`~numpy.ndarray`</span>
+
+<span class="sd">    :var inverted: inversion related parameters from ``**kwargs``.</span>
+<span class="sd">    :vartype inverted: dict</span>
+<span class="sd">    :var cmt: moment tensor elements in GCMT format: mrr, mtt, mpp, mrt, mrp, mtp.</span>
+<span class="sd">        Units are in N-m.</span>
+<span class="sd">    :vartype cmt: :class:`~numpy.ndarray`</span>
+<span class="sd">    :var iso: isotropic moment tensor elements.</span>
+<span class="sd">    :vartype iso: :class:`~numpy.ndarray`</span>
+<span class="sd">    :var dev: deviatoric moment tensor elements.</span>
+<span class="sd">    :vartype dev: :class:`~numpy.ndarray`</span>
+<span class="sd">    :var dc: double-couple moment tensor elements.</span>
+<span class="sd">    :vartype dc: :class:`~numpy.ndarray`</span>
+<span class="sd">    :var clvd: CLVD moment tensor elements.</span>
+<span class="sd">    :vartype clvd: :class:`~numpy.ndarray`</span>
+<span class="sd">    :var eigenvalues: eigenvalues.</span>
+<span class="sd">    :vartype eigenvalues: :class:`~numpy.ndarray`</span>
+<span class="sd">    :var mo: total scalar seismic moment in Bowers and Hudson (1999) convention.</span>
+<span class="sd">        Unit is in dyne-cm.</span>
+<span class="sd">    :vartype mo: float</span>
+<span class="sd">    :var mw: moment magnitude in dyne-cm.</span>
+<span class="sd">    :vartype mw: float</span>
+<span class="sd">    :var mw_dev: deviatoric moment magnitude.</span>
+<span class="sd">    :vartype mw_dev: float</span>
+<span class="sd">    :var miso: isotropic moment in dyne-cm.</span>
+<span class="sd">    :vartype miso: float</span>
+<span class="sd">    :var mdc: double-couple moment in dyne-cm.</span>
+<span class="sd">    :vartype mdc: float</span>
+<span class="sd">    :var mclvd: CLVD moment in dyne-cm.</span>
+<span class="sd">    :vartype mclvd: float</span>
+<span class="sd">    :var pdc: percentage of double-couple component.</span>
+<span class="sd">    :vartype pdc: float</span>
+<span class="sd">    :var pclvd: percentage of CLVD component.</span>
+<span class="sd">    :vartype pclvd: float</span>
+<span class="sd">    :var piso: percentage of isotropic component.</span>
+<span class="sd">    :vartype piso: float</span>
+<span class="sd">    :var fps: strike, dip, and rake of the two fault planes.</span>
+<span class="sd">    :vartype fps: list((float, float, float), (float, float, float))</span>
+<span class="sd">    :var lune: gamma and delta in lune source-type space.</span>
+<span class="sd">    :vartype lune: (float, float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_m</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="c1"># Optional keywords default to None</span>
+        <span class="n">inverted</span> <span class="o">=</span> <span class="n">AttribDict</span><span class="p">()</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">,</span><span class="s2">&quot;ts&quot;</span><span class="p">,</span><span class="s2">&quot;weights&quot;</span><span class="p">,</span><span class="s2">&quot;station_VR&quot;</span><span class="p">,</span><span class="s2">&quot;total_VR&quot;</span><span class="p">,</span><span class="s2">&quot;dd&quot;</span><span class="p">,</span><span class="s2">&quot;ss&quot;</span><span class="p">]</span>
+        <span class="c1"># Update given key by their given value</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">inverted</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span> <span class="o">=</span> <span class="n">inverted</span>
+
+    <span class="k">def</span> <span class="nf">_set_m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">m</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Please provide a moment tensor.&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">m</span>
+
+<div class="viewcode-block" id="Tensor.cartesian_to_spherical"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.tensor.Tensor.cartesian_to_spherical.html#tdmtpy.tensor.Tensor.cartesian_to_spherical">[docs]</a>    <span class="k">def</span> <span class="nf">cartesian_to_spherical</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Conversion from cartesian coordinates to spherical coordinates</span>
+
+<span class="sd">        A function that converts moment tensor elements from attribute ``m`` to GCMT format</span>
+<span class="sd">        and assigns the vector of tensor elements (mrr, mtt, mpp, mrt, mrp, mtp)</span>
+<span class="sd">        to attribute ``cmt``.</span>
+
+<span class="sd">        Conversion is defined by:</span>
+
+<span class="sd">        Mrr=Mzz, Mtt=Mxx, Mpp=Myy, Mrt=Mxz, Mrp=-Myz, Mtp=-Mxy,</span>
+
+<span class="sd">        where x, y, z equal to north, east, down (Aki and Richards, 2002).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">,)</span>
+        <span class="n">cmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">cmt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cmt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cmt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">cmt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">cmt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmt</span> <span class="o">=</span> <span class="n">cmt</span><span class="o">/</span><span class="mf">1e7</span> <span class="c1"># convert to Newton-meters</span></div>
+
+<div class="viewcode-block" id="Tensor.decompose"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.tensor.Tensor.decompose.html#tdmtpy.tensor.Tensor.decompose">[docs]</a>    <span class="k">def</span> <span class="nf">decompose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Moment tensor decomposition</span>
+
+<span class="sd">        A function that decomposes the moment tensor from attribute ``m`` and assigns the result</span>
+<span class="sd">        to various other attributes. Refer to :class:`~tdmtpy.tensor.Tensor` for the full</span>
+<span class="sd">        list of variables after decomposition.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">4</span><span class="p">]],</span>
+                      <span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">5</span><span class="p">]],</span>
+                      <span class="p">[</span><span class="n">m</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">m</span><span class="p">[</span><span class="mi">2</span><span class="p">]]]</span>
+                     <span class="p">)</span>
+
+        <span class="c1"># Isotropic part:</span>
+        <span class="n">M_iso</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">M</span><span class="p">),</span>
+                                  <span class="mf">1.</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">M</span><span class="p">),</span>
+                                  <span class="mf">1.</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">M</span><span class="p">)]</span>
+                                <span class="p">)</span>
+                        <span class="p">)</span>
+        <span class="n">miso</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+        
+        <span class="c1"># Deviatoric part:</span>
+        <span class="n">M_dev</span> <span class="o">=</span> <span class="n">M</span> <span class="o">-</span> <span class="n">M_iso</span>
+        
+        <span class="c1"># compute eigenvalues and -vectors:</span>
+        <span class="n">eigVal</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+        <span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">eigVal</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">eigVal</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        
+        <span class="c1"># deviatoric eigenvalues and -vectors</span>
+        <span class="n">eigVal</span><span class="p">,</span> <span class="n">eigVec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">M_dev</span><span class="p">)</span>
+        
+        <span class="c1"># sort in absolute value ascending order:</span>
+        <span class="n">dev_eigval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">eigVal</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">eigVal</span><span class="p">))))</span>
+        <span class="n">dev_eigvec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">eigVec</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">eigVal</span><span class="p">)),</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># Jost and Herrmann, 1989 definition of eigenvalues:</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">dev_eigval</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1">#       m2 = dev_eigval[1]</span>
+        <span class="n">m3</span> <span class="o">=</span> <span class="n">dev_eigval</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># deviatoric moment</span>
+      
+        <span class="k">if</span> <span class="n">m3</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span> <span class="c1"># isotropic only</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">m1</span><span class="o">/</span><span class="n">m3</span>
+        
+        <span class="c1"># Construct Dyadic Description of Vector Dipoles:</span>
+        <span class="n">a3a3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">2</span><span class="p">],</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]])</span>
+        <span class="n">a3a3</span> <span class="o">=</span> <span class="n">a3a3</span><span class="o">*</span><span class="n">a3a3</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">a2a2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">a2a2</span> <span class="o">=</span> <span class="n">a2a2</span><span class="o">*</span><span class="n">a2a2</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">a1a1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">dev_eigvec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">a1a1</span> <span class="o">=</span> <span class="n">a1a1</span><span class="o">*</span><span class="n">a1a1</span><span class="o">.</span><span class="n">T</span>
+        
+        <span class="n">M_clvd</span> <span class="o">=</span> <span class="n">m3</span><span class="o">*</span><span class="n">F</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">a3a3</span><span class="o">-</span><span class="n">a2a2</span><span class="o">-</span><span class="n">a1a1</span><span class="p">)</span> <span class="c1"># CLVD tensor</span>
+        <span class="n">mclvd</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">m3</span><span class="p">)</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span>
+        
+        <span class="n">M_dc</span> <span class="o">=</span> <span class="n">m3</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">F</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">a3a3</span><span class="o">-</span><span class="n">a2a2</span><span class="p">)</span> <span class="c1"># DC tensor</span>
+        <span class="n">mdc</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">m3</span><span class="p">)</span><span class="o">*</span><span class="nb">abs</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">F</span><span class="p">)</span>
+        
+        <span class="c1"># Bowers and Hudson&#39;s definition of seismic moment</span>
+        <span class="n">mo</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">miso</span><span class="p">)</span><span class="o">+</span><span class="nb">abs</span><span class="p">(</span><span class="n">m3</span><span class="p">)</span> <span class="c1"># iso moment + dev moment</span>
+        <span class="n">mw</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mo</span><span class="p">)</span><span class="o">-</span><span class="mf">16.05</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span> <span class="c1"># dyne-cm</span>
+        <span class="n">mw_dev</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mo</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="o">-</span><span class="mf">10.73</span>
+
+        <span class="c1"># Calculate percentage</span>
+        <span class="n">piso</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">miso</span><span class="p">)</span><span class="o">/</span><span class="n">mo</span><span class="o">*</span><span class="mi">100</span>
+        <span class="n">pdc</span> <span class="o">=</span> <span class="n">mdc</span><span class="o">/</span><span class="n">mo</span><span class="o">*</span><span class="mi">100</span>
+        <span class="n">pclvd</span> <span class="o">=</span> <span class="n">mclvd</span><span class="o">/</span><span class="n">mo</span><span class="o">*</span><span class="mi">100</span>
+        
+        <span class="c1"># DC Fault planes</span>
+        <span class="n">fps</span> <span class="o">=</span>  <span class="n">find_fault_planes</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">M_dc</span><span class="p">)</span>
+    
+        <span class="c1"># Find gamma and delta, Tape&amp;Tape lune parameters</span>
+        <span class="n">lune</span> <span class="o">=</span> <span class="n">eigen2lune</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">)</span>
+    
+        <span class="c1">#self.M = np.array([M[0,0],M[1,1],M[2,2],M[0,1],M[0,2],M[1,2]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iso</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">M_iso</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">M_iso</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_iso</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_iso</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_iso</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_iso</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">M_dev</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">M_dev</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_dev</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_dev</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_dev</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_dev</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">M_dc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">M_dc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_dc</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_dc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_dc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_dc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clvd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">M_clvd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">M_clvd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_clvd</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_clvd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">M_clvd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">M_clvd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">eigenvalues</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mo</span> <span class="o">=</span> <span class="n">mo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mw</span> <span class="o">=</span> <span class="n">mw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mw_dev</span> <span class="o">=</span> <span class="n">mw_dev</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">miso</span> <span class="o">=</span> <span class="n">miso</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mdc</span> <span class="o">=</span> <span class="n">mdc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mclvd</span> <span class="o">=</span> <span class="n">mclvd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pdc</span> <span class="o">=</span> <span class="n">pdc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pclvd</span> <span class="o">=</span> <span class="n">pclvd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">piso</span> <span class="o">=</span> <span class="n">piso</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fps</span> <span class="o">=</span> <span class="n">fps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lune</span> <span class="o">=</span> <span class="n">lune</span></div>
+
+<div class="viewcode-block" id="Tensor.write"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.tensor.Tensor.write.html#tdmtpy.tensor.Tensor.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">inv_type</span><span class="p">,</span><span class="n">df</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write detailed solution file</span>
+
+<span class="sd">        A function that saves the detailed moment tensor solution to a file named</span>
+<span class="sd">        `d[depth].mtinv.out`, where depth is the inverted source depth in attribute</span>
+<span class="sd">        ``inverted.depth``.</span>
+
+<span class="sd">        :param inv_type: type of moment tensor inversion, ``deviatoric`` or ``full``.</span>
+<span class="sd">        :type inv_type: str</span>
+<span class="sd">        :param df: updated station table from attribute ``config.df`` in</span>
+<span class="sd">            :class:`~tdmtpy.inversion.Inversion`.</span>
+<span class="sd">        :type df: :class:`~pandas.DataFrame`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;d</span><span class="si">%7.4f</span><span class="s2">.mtinv.out&quot;</span> <span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cartesian_to_spherical</span><span class="p">()</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{type:s}</span><span class="s2"> Moment Tensor Inversion</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Depth = </span><span class="si">{depth:7.4f}</span><span class="s2"> (km)</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Mo = </span><span class="si">{mo:.3e}</span><span class="s2"> (dyne-cm)</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Mw = </span><span class="si">{mw:.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Percent DC   = </span><span class="si">{pdc:3.0f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Percent CLVD = </span><span class="si">{pclvd:3.0f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Percent ISO  = </span><span class="si">{piso:3.0f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Fault Plane 1: Strike=</span><span class="si">{fps[0][0]:&lt;3.0f}</span><span class="s2"> Dip=</span><span class="si">{fps[0][1]:&lt;2.0f}</span><span class="s2"> Rake=</span><span class="si">{fps[0][2]:&lt;3.0f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Fault Plane 2: Strike=</span><span class="si">{fps[1][0]:&lt;3.0f}</span><span class="s2"> Dip=</span><span class="si">{fps[1][1]:&lt;2.0f}</span><span class="s2"> Rake=</span><span class="si">{fps[1][2]:&lt;3.0f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Percent Variance Reduction = </span><span class="si">{VR:.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Moment Tensor Elements: Aki and Richards Cartesian Coordinates</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Mxx        Myy        Mzz        Mxy        Mxz        Myz</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;</span><span class="si">{m[0]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{m[1]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{m[2]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{m[3]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{m[4]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{m[5]:&lt;10.3e}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;GCMT convention (N-m)</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Mrr        Mtt        Mpp        Mrt        Mrp        Mtp</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;</span><span class="si">{cmt[0]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{cmt[1]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{cmt[2]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{cmt[3]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{cmt[4]:&lt;10.3e}</span><span class="s2"> </span><span class="si">{cmt[5]:&lt;10.3e}</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Eigenvalues: </span><span class="si">{eigenvalues[0]:.3e}</span><span class="s2"> </span><span class="si">{eigenvalues[1]:.3e}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Lune Coordinates: </span><span class="si">{lune[0]:&lt;6.2f}</span><span class="s2"> </span><span class="si">{lune[1]:&lt;6.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Station Information</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">inv_type</span><span class="p">,</span>
+                         <span class="n">depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
+                         <span class="n">mo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mo</span><span class="p">,</span>
+                         <span class="n">mw</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mw</span><span class="p">,</span>
+                         <span class="n">pdc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pdc</span><span class="p">,</span>
+                         <span class="n">pclvd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pclvd</span><span class="p">,</span>
+                         <span class="n">piso</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">piso</span><span class="p">,</span>
+                         <span class="n">fps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fps</span><span class="p">,</span>
+                         <span class="n">VR</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">total_VR</span><span class="p">,</span>
+                         <span class="n">m</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
+                         <span class="n">cmt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cmt</span><span class="p">,</span>
+                         <span class="n">eigenvalues</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span><span class="p">,</span>
+                         <span class="n">lune</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lune</span>
+                        <span class="p">)</span>
+
+        <span class="c1"># Update station table</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">ts</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;VR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">station_VR</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;VR&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;VR&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">weights</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;weights&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+
+        <span class="c1"># columns = [&quot;station&quot;,&quot;distance&quot;,&quot;azimuth&quot;,&quot;ts&quot;,&quot;npts&quot;,&quot;dt&quot;,&quot;&quot;]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)))</span></div>
+
+    <span class="k">def</span> <span class="nf">_beach_waveforms_3c</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">inv_type</span><span class="p">,</span><span class="n">components</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">show</span><span class="p">,</span><span class="nb">format</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot waveform fits and focal mechanisms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Turn interactive plotting off</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>  <span class="c1"># only display plots when called, save figure without displaying in ipython</span>
+
+        <span class="c1"># Max. 10 stations per figure</span>
+        <span class="n">nsta</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span>  <span class="c1"># row=station,col=component</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">nsta</span> <span class="o">/</span> <span class="n">nrows</span>
+        <span class="n">nPages</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nsta</span><span class="p">,</span> <span class="n">nrows</span><span class="p">))</span>
+        <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nsta</span><span class="p">)</span>
+        <span class="n">pages</span> <span class="o">=</span> <span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lst</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nPages</span><span class="p">))</span>
+
+        <span class="c1"># Brief summary of inversion</span>
+        <span class="n">annot</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{inv_type:s}</span><span class="s2"> Moment Tensor Inversion</span><span class="se">\n</span><span class="s2">&quot;</span>
+                 <span class="s2">&quot;Depth = </span><span class="si">{depth:.4f}</span><span class="s2"> km</span><span class="se">\n</span><span class="s2">&quot;</span>
+                 <span class="s2">&quot;Mw = </span><span class="si">{mw:.2f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                 <span class="s2">&quot;Percent DC/CLVD/ISO = </span><span class="si">{pdc:.0f}</span><span class="s2">/</span><span class="si">{pclvd:.0f}</span><span class="s2">/</span><span class="si">{piso:.0f}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                 <span class="s2">&quot;VR = </span><span class="si">{VR:.2f}%%</span><span class="se">\n</span><span class="s2">&quot;</span>
+                 <span class="p">)</span>
+        <span class="n">annot</span> <span class="o">=</span> <span class="n">annot</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">inv_type</span><span class="o">=</span><span class="n">inv_type</span><span class="p">,</span>
+                             <span class="n">depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
+                             <span class="n">mw</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mw</span><span class="p">,</span>
+                             <span class="n">pdc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pdc</span><span class="p">,</span>
+                             <span class="n">pclvd</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pclvd</span><span class="p">,</span>
+                             <span class="n">piso</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">piso</span><span class="p">,</span>
+                             <span class="n">VR</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">total_VR</span>
+                             <span class="p">)</span>
+
+        <span class="c1"># Decompositions to plot</span>
+        <span class="k">if</span> <span class="n">inv_type</span> <span class="o">==</span> <span class="s2">&quot;Deviatoric&quot;</span><span class="p">:</span>
+            <span class="n">fm_title</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Deviatoric&quot;</span><span class="p">,</span> <span class="s2">&quot;DC&quot;</span><span class="p">,</span> <span class="s2">&quot;CLVD&quot;</span><span class="p">]</span>
+            <span class="n">fm</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">clvd</span><span class="p">]</span>
+            <span class="n">fm_width</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.01</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pdc</span><span class="p">,</span><span class="mf">0.01</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">pclvd</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">inv_type</span> <span class="o">==</span> <span class="s2">&quot;Full&quot;</span><span class="p">:</span>
+            <span class="n">fm_title</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Full&#39;</span><span class="p">,</span> <span class="s1">&#39;ISO&#39;</span><span class="p">,</span> <span class="s1">&#39;Deviatoric&#39;</span><span class="p">]</span>
+            <span class="n">fm</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iso</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="p">)</span>
+            <span class="n">fm_width</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.01</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">piso</span><span class="p">,</span> <span class="mf">0.01</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdc</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">pclvd</span><span class="p">)]</span>
+        <span class="n">fm_sign</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">fm_width</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">2.5</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">fm_width</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Station location around beach ball</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="mf">0.55</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">azimuth</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.55</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">azimuth</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">tri_color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="s2">&quot;0.5&quot;</span><span class="p">,</span><span class="n">nsta</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;&lt;U5&quot;</span><span class="p">)</span>
+        <span class="n">tri_color</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">components</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;green&quot;</span>
+
+        <span class="c1"># Waveform line colors</span>
+        <span class="n">syntcol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">components</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U5&#39;</span><span class="p">)</span>
+        <span class="n">syntcol</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">components</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span>
+        <span class="n">syntcol</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">components</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0.5&#39;</span>
+        <span class="n">datacol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">components</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U5&#39;</span><span class="p">)</span>
+        <span class="n">datacol</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">components</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+        <span class="n">datacol</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">components</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0.5&#39;</span>
+
+        <span class="k">for</span> <span class="n">page</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pages</span><span class="p">):</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">ax0</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">new_page</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">),</span> <span class="n">nrows</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="n">annot</span><span class="p">)</span>
+            <span class="c1"># Plot beach balls</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fm</span><span class="p">)):</span>
+                <span class="n">beach1</span> <span class="o">=</span> <span class="n">beach</span><span class="p">(</span><span class="n">fm</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="n">fm_width</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">show_iso</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">ax0</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">beach1</span><span class="p">)</span>
+                <span class="n">ax0</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">,</span> <span class="n">fm_title</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+            <span class="n">ax0</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">fm_sign</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+            <span class="n">ax0</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">fm_sign</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+            <span class="c1"># Plot stations around beach ball</span>
+            <span class="k">for</span> <span class="n">xi</span><span class="p">,</span><span class="n">yi</span><span class="p">,</span><span class="n">azi</span><span class="p">,</span><span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">df</span><span class="o">.</span><span class="n">azimuth</span><span class="p">,</span><span class="n">tri_color</span><span class="p">):</span>
+                <span class="n">ax0</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">azi</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">101</span><span class="p">)</span>
+            <span class="c1"># Plot waveforms</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">group</span><span class="p">):</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">npts</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span> <span class="o">*</span> <span class="n">df</span><span class="o">.</span><span class="n">dt</span><span class="p">[</span><span class="n">stat</span><span class="p">],</span> <span class="n">df</span><span class="o">.</span><span class="n">dt</span><span class="p">[</span><span class="n">stat</span><span class="p">])</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">dd</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span>
+                <span class="n">synt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">ss</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span>
+                <span class="n">ymin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">data</span><span class="p">,</span> <span class="n">synt</span><span class="p">])</span>
+                <span class="n">ymax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">data</span><span class="p">,</span> <span class="n">synt</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)):</span>
+                    <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">data</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">datacol</span><span class="p">[</span><span class="n">stat</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                    <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">synt</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">syntcol</span><span class="p">[</span><span class="n">stat</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">dashes</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+                    <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+                    <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="c1"># Set ticks and labels</span>
+                <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="n">ymin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ymax</span><span class="p">])</span>
+                <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%.2e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ymin</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%.2e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ymax</span><span class="p">])</span>
+                <span class="c1"># Station name</span>
+                <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">station</span><span class="p">[</span><span class="n">stat</span><span class="p">],</span>
+                               <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+                <span class="c1"># Distance and azimuth</span>
+
+                <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">distance</span><span class="p">[</span><span class="n">stat</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:.0f}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0:.4f}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">dist</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">distance</span><span class="p">[</span><span class="n">stat</span><span class="p">])</span>
+                <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">ymax</span><span class="p">,</span>
+                               <span class="sa">r</span><span class="s1">&#39;$\mathit</span><span class="si">{r}</span><span class="s1">,\varphi$=</span><span class="si">%s</span><span class="s1">,</span><span class="si">%-.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                               <span class="n">dist</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">azimuth</span><span class="p">[</span><span class="n">stat</span><span class="p">]),</span>
+                               <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
+                <span class="c1"># Sample shift and VR</span>
+                <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ymax</span><span class="p">,</span>
+                               <span class="s1">&#39;ts,VR=</span><span class="si">%d</span><span class="s1">,</span><span class="si">%.0f</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">ts</span><span class="p">[</span><span class="n">stat</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">station_VR</span><span class="p">[</span><span class="n">stat</span><span class="p">]),</span>
+                               <span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span><span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
+
+            <span class="n">outfile</span> <span class="o">=</span> <span class="s2">&quot;bbwaves.d</span><span class="si">%7.4f</span><span class="s2">.</span><span class="si">%02d</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span><span class="n">page</span><span class="p">,</span><span class="nb">format</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span><span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Mxx=</span><span class="si">{m[0]:&gt;10.3e}</span><span class="s2"> Myy=</span><span class="si">{m[1]:&gt;10.3e}</span><span class="s2"> Mzz=</span><span class="si">{m[2]:&gt;10.3e}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="s2">&quot;Mxy=</span><span class="si">{m[3]:&gt;10.3e}</span><span class="s2"> Mxz=</span><span class="si">{m[4]:&gt;10.3e}</span><span class="s2"> Myz=</span><span class="si">{m[5]:&gt;10.3e}</span><span class="se">\n</span><span class="s2">&quot;</span>
+               <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">m</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_repr_pretty_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">cycle</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Lawrence Livermore National Security, LLC
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,549 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tdmtpy.image &mdash; tdmtpy 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/OS-icon-color.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/OS-logo-horizontal-white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tdmtpy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>tdmtpy.image</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tdmtpy.image</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># SPDX-License-Identifier: (LGPL-3.0)</span>
+<span class="c1"># LLNL-CODE-814839</span>
+<span class="c1"># author: Andrea Chiang (andrea4@llnl.gov)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plotting routines for tdmtpy</span>
+
+<span class="sd">.. warning::</span>
+
+<span class="sd">   This module should NOT be used directly instead used the class method</span>
+<span class="sd">   :meth:`~tdmtpy.inversion.Inversion.plot`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.path</span> <span class="k">as</span> <span class="nn">mpath</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="kn">import</span> <span class="n">GridSpec</span>
+<span class="kn">import</span> <span class="nn">matplotlib.collections</span> <span class="k">as</span> <span class="nn">mpl_collections</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">patches</span><span class="p">,</span> <span class="n">transforms</span>
+<span class="kn">from</span> <span class="nn">obspy.imaging.beachball</span> <span class="kn">import</span> <span class="n">xy2patch</span>
+<span class="kn">from</span> <span class="nn">obspy.imaging.scripts.mopad</span> <span class="kn">import</span> <span class="n">BeachBall</span> <span class="k">as</span> <span class="n">mopad_BeachBall</span>
+<span class="kn">from</span> <span class="nn">obspy.imaging.scripts.mopad</span> <span class="kn">import</span> <span class="n">MomentTensor</span> <span class="k">as</span> <span class="n">mopad_MomentTensor</span>
+<span class="kn">from</span> <span class="nn">obspy.imaging.scripts.mopad</span> <span class="kn">import</span> <span class="n">epsilon</span>
+
+<span class="kn">from</span> <span class="nn">obspy.geodetics.base</span> <span class="kn">import</span> <span class="n">kilometers2degrees</span>
+<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span class="kn">import</span> <span class="nn">cartopy.io.img_tiles</span> <span class="k">as</span> <span class="nn">cimgt</span>
+
+
+<div class="viewcode-block" id="new_page"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.image.new_page.html#tdmtpy.image.new_page">[docs]</a><span class="k">def</span> <span class="nf">new_page</span><span class="p">(</span><span class="n">nsta</span><span class="p">,</span><span class="n">nrows</span><span class="p">,</span><span class="n">ncols</span><span class="p">,</span><span class="n">annot</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">offset</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">8.5</span><span class="p">,</span><span class="mi">11</span><span class="p">)):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a new figure</span>
+
+<span class="sd">    Creates a new :class:`~matplotlib.figure.Figure` and customizes</span>
+<span class="sd">    subplot layout and figure axes. This is the figure layout for plotting</span>
+<span class="sd">    focal mechanisms and waveform fits.</span>
+
+<span class="sd">    :param nsta: total number of stations.</span>
+<span class="sd">    :param nrows: number of stations to plot per page.</span>
+<span class="sd">    :param ncols: number of components to plot per page.</span>
+<span class="sd">    :param annot: figure annotations.</span>
+<span class="sd">    :param offset: offset between waveform traces.</span>
+<span class="sd">    :param figsize: figure dimension (width,height) in inches.</span>
+<span class="sd">    :return: figure container, axis of the focal mechanism plot, and axes for the waveform traces.</span>
+<span class="sd">    :rtype: class:`~matplotlib.figure.Figure`, :class:`~matplotlib.axes.Axes`, list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span><span class="n">nrows</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span><span class="n">ncols</span><span class="p">,</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+    
+    <span class="c1"># Annotations and beach balls</span>
+    <span class="n">ax0</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">offset</span><span class="p">,:],</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mf">3.55</span><span class="p">),</span><span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">0.6</span><span class="p">),</span><span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">annot</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+    <span class="n">ax0</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+
+    <span class="c1"># Waveforms</span>
+    <span class="n">ax1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">nsta</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">)</span> <span class="c1"># create empty axes</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsta</span><span class="p">):</span>
+        <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1"># Adjust axes</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsta</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">adjust_spines</span><span class="p">(</span><span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="s1">&#39;left&#39;</span><span class="p">])</span>
+        <span class="n">adjust_spines</span><span class="p">(</span><span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="p">[])</span>
+        <span class="n">adjust_spines</span><span class="p">(</span><span class="n">ax1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">])</span>
+    <span class="n">adjust_spines</span><span class="p">(</span><span class="n">ax1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s2">&quot;bottom&quot;</span><span class="p">])</span>
+    <span class="n">adjust_spines</span><span class="p">(</span><span class="n">ax1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="s1">&#39;bottom&#39;</span><span class="p">])</span>
+    <span class="n">adjust_spines</span><span class="p">(</span><span class="n">ax1</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="s1">&#39;bottom&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># Title</span>
+    <span class="n">ax1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Vertical&#39;</span><span class="p">,</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">pad</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Radial&#39;</span><span class="p">,</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">pad</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Tangential&#39;</span><span class="p">,</span><span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">pad</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">ax0</span><span class="p">,</span><span class="n">ax1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="adjust_spines"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.image.adjust_spines.html#tdmtpy.image.adjust_spines">[docs]</a><span class="k">def</span> <span class="nf">adjust_spines</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span><span class="n">spines</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adjust axis spine</span>
+
+<span class="sd">    Function to customize figure axes.</span>
+
+<span class="sd">    :param ax: the Axes instance containing the spine.</span>
+<span class="sd">    :type ax: :class:`~matplotlib.axes.Axes`</span>
+<span class="sd">    :param spines: spine type.</span>
+<span class="sd">    :type spines: list(str)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s1">&#39;in&#39;</span><span class="p">,</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">spines</span><span class="p">:</span>
+            <span class="n">spine</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s1">&#39;outward&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span> <span class="c1"># outward by 5 points</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spine</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;none&#39;</span><span class="p">)</span> <span class="c1"># don&#39;t draw spine</span>
+
+    <span class="c1"># turn off ticks where there is no spine</span>
+    <span class="k">if</span> <span class="s1">&#39;left&#39;</span> <span class="ow">in</span> <span class="n">spines</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">([])</span>
+
+    <span class="k">if</span> <span class="s1">&#39;bottom&#39;</span> <span class="ow">in</span> <span class="n">spines</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time (s)&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">([])</span></div>
+
+
+<div class="viewcode-block" id="beach"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.image.beach.html#tdmtpy.image.beach">[docs]</a><span class="k">def</span> <span class="nf">beach</span><span class="p">(</span><span class="n">fm</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;0.75&#39;</span><span class="p">,</span> <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+          <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">nofill</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+          <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">mopad_basis</span><span class="o">=</span><span class="s1">&#39;NED&#39;</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show_iso</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot beach ball based on `MoPaD &lt;http://www.larskrieger.de/mopad/&gt;`_</span>
+
+<span class="sd">    Function that returns a beach ball as a collection and can be added to</span>
+<span class="sd">    an existing :class:`~matplotlib.axes.Axes`. This is modified from the</span>
+<span class="sd">    :func:`~obspy.imaging.mopad_wrapper.beach` function to properly handle isotropic</span>
+<span class="sd">    components. Original function only supports pure isotropic sources when isotropic</span>
+<span class="sd">    components are plotted.</span>
+
+<span class="sd">    :param fm: focal mechanism in (strike, dip, rake) or (M11,M22,M33,M12,M13,M23).</span>
+<span class="sd">        The moment tensor elements are given for a coordinate system with axes pointing</span>
+<span class="sd">        in three directions. Default is North, East and Down.</span>
+<span class="sd">    :type fm: list</span>
+<span class="sd">    :param linewidth: width of nodal and border lines. Default is ``1``.</span>
+<span class="sd">    :type linewidth: float</span>
+<span class="sd">    :param facecolor: color or shade of the compressive quadrants.</span>
+<span class="sd">        Default is ``0.75`` (gray).</span>
+<span class="sd">    :type facecolor: str</span>
+<span class="sd">    :param bgcolor: background color, default is ``w`` (white).</span>
+<span class="sd">    :type bgcolor: str</span>
+<span class="sd">    :param edgecolor: color of nodal and border lines, default is ``b`` (black).</span>
+<span class="sd">    :type edgecolor: str</span>
+<span class="sd">    :param alpha: beach ball transparency, default is ``1.0`` (opaque).</span>
+<span class="sd">    :type alpha: float</span>
+<span class="sd">    :param xy: original position of the beach ball. Default is ``(0, 0)``</span>
+<span class="sd">    :type xy: tuple</span>
+<span class="sd">    :param width: width of the beach ball (aka symbol size). Default is ``200``.</span>
+<span class="sd">    :type width: int</span>
+<span class="sd">    :param size: number of points interpolated to draw the cruve. Default is ``100``.</span>
+<span class="sd">    :type size: int</span>
+<span class="sd">    :param nofill: no shading of the beach ball. Default is ``False``.</span>
+<span class="sd">    :type nofill: bool</span>
+<span class="sd">    :param zorder: set the zorder for the artist. Artists with lower zorder values are drawn first.</span>
+<span class="sd">        Default is ``100``.</span>
+<span class="sd">    :type zorder: float</span>
+<span class="sd">    :param mopad_basis: moment tensor coordinate system. See supported coordinate</span>
+<span class="sd">        system below. Default is ``&quot;NED&quot;``.</span>
+<span class="sd">    :type mopad_basis: str</span>
+<span class="sd">    :param axes: figure axis for beach ball, this is used to ensure the aspect ratio is</span>
+<span class="sd">        adjusted so that the beach ball is circular on non-scaled axes.</span>
+<span class="sd">        Default is ``None``.</span>
+<span class="sd">    :type axes: :class:`~matplotlib.axes.Axes`</span>
+<span class="sd">    :param show_iso: flag to display the isotropic component, default is ``False``.</span>
+<span class="sd">    :type show_iso: bool</span>
+<span class="sd">    :return: a collection of lines and polygons.</span>
+<span class="sd">    :rtype: :class:`~matplotlib.collections.PatchCollection`</span>
+
+<span class="sd">    .. rubric:: Supported coordinate systems:</span>
+
+<span class="sd">    .. cssclass: table-striped</span>
+
+<span class="sd">    ================   ==================   ==========================</span>
+<span class="sd">    ``mopad_basis``    vectors              reference</span>
+<span class="sd">    ================   ==================   ==========================</span>
+<span class="sd">    &quot;NED&quot;              north, east, down    Jost and Herrmann, 1989</span>
+<span class="sd">    &quot;USE&quot;              up, south, east      Larson et al., 2010</span>
+<span class="sd">    &quot;XYZ&quot;              east, north, up      Jost and Herrmann, 1989</span>
+<span class="sd">    &quot;NWU&quot;              north, west, up      Stein and Wysession, 2003</span>
+<span class="sd">    ================   ==================   ==========================</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># initialize beachball</span>
+    <span class="n">mt</span> <span class="o">=</span> <span class="n">mopad_MomentTensor</span><span class="p">(</span><span class="n">fm</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="n">mopad_basis</span><span class="p">)</span>
+    <span class="n">bb</span> <span class="o">=</span> <span class="n">mopad_BeachBall</span><span class="p">(</span><span class="n">mt</span><span class="p">,</span> <span class="n">npoints</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1">## Snippets added by A. Chiang</span>
+    <span class="k">if</span> <span class="n">show_iso</span><span class="p">:</span>
+        <span class="n">bb</span><span class="o">.</span><span class="n">_plot_isotropic_part</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">bb</span><span class="o">.</span><span class="n">_nodallines_in_NED_system</span><span class="p">()</span>
+    
+    <span class="c1">##</span>
+    <span class="n">bb</span><span class="o">.</span><span class="n">_setup_BB</span><span class="p">(</span><span class="n">unit_circle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># extract the coordinates and colors of the lines</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">neg_nodalline</span> <span class="o">=</span> <span class="n">bb</span><span class="o">.</span><span class="n">_nodalline_negative_final_US</span>
+    <span class="n">pos_nodalline</span> <span class="o">=</span> <span class="n">bb</span><span class="o">.</span><span class="n">_nodalline_positive_final_US</span>
+    <span class="n">tension_colour</span> <span class="o">=</span> <span class="n">facecolor</span>
+    <span class="n">pressure_colour</span> <span class="o">=</span> <span class="n">bgcolor</span>
+
+    <span class="k">if</span> <span class="n">nofill</span><span class="p">:</span>
+        <span class="n">tension_colour</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">pressure_colour</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+    <span class="c1"># based on mopads _setup_plot_US() function</span>
+    <span class="c1"># collect patches for the selection</span>
+    <span class="n">coll</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="n">coll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span><span class="o">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+    <span class="n">coll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xy2patch</span><span class="p">(</span><span class="n">neg_nodalline</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">neg_nodalline</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">radius</span><span class="p">,</span> <span class="n">xy</span><span class="p">)</span>
+    <span class="n">coll</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">xy2patch</span><span class="p">(</span><span class="n">pos_nodalline</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">pos_nodalline</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="n">radius</span><span class="p">,</span> <span class="n">xy</span><span class="p">)</span>
+
+    <span class="c1"># set the color of the three parts</span>
+    <span class="n">fc</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bb</span><span class="o">.</span><span class="n">_plot_clr_order</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">fc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+        <span class="n">fc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+        <span class="n">fc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+        <span class="k">if</span> <span class="n">bb</span><span class="o">.</span><span class="n">_plot_curve_in_curve</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">fc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+            <span class="k">if</span> <span class="n">bb</span><span class="o">.</span><span class="n">_plot_curve_in_curve</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">coll</span> <span class="o">=</span> <span class="p">[</span><span class="n">coll</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+        <span class="n">fc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+        <span class="n">fc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+        <span class="k">if</span> <span class="n">bb</span><span class="o">.</span><span class="n">_plot_curve_in_curve</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">fc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+            <span class="k">if</span> <span class="n">bb</span><span class="o">.</span><span class="n">_plot_curve_in_curve</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">coll</span> <span class="o">=</span> <span class="p">[</span><span class="n">coll</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tension_colour</span>
+                <span class="n">fc</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">pressure_colour</span>
+
+    <span class="k">if</span> <span class="n">bb</span><span class="o">.</span><span class="n">_pure_isotropic</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">bb</span><span class="o">.</span><span class="n">_M</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">epsilon</span><span class="p">:</span>
+            <span class="c1"># use the circle as the most upper layer</span>
+            <span class="n">coll</span> <span class="o">=</span> <span class="p">[</span><span class="n">coll</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="n">bb</span><span class="o">.</span><span class="n">_plot_clr_order</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">fc</span> <span class="o">=</span> <span class="p">[</span><span class="n">tension_colour</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fc</span> <span class="o">=</span> <span class="p">[</span><span class="n">pressure_colour</span><span class="p">]</span>
+
+    <span class="c1"># transform the patches to a path collection and set</span>
+    <span class="c1"># the appropriate attributes</span>
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">mpl_collections</span><span class="o">.</span><span class="n">PatchCollection</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">match_original</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_facecolors</span><span class="p">(</span><span class="n">fc</span><span class="p">)</span>
+    <span class="c1"># Use the given axes to maintain the aspect ratio of beac hballs on figure</span>
+    <span class="c1"># resize.</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># This is what holds the aspect ratio (but breaks the positioning)</span>
+        <span class="n">collection</span><span class="o">.</span><span class="n">set_transform</span><span class="p">(</span><span class="n">transforms</span><span class="o">.</span><span class="n">IdentityTransform</span><span class="p">())</span> <span class="c1"># Need to find another way to print as vector graphics</span>
+        <span class="c1"># Next is a dirty hack to fix the positioning:</span>
+        <span class="c1"># 1. Need to bring the all patches to the origin (0, 0).</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">collection</span><span class="o">.</span><span class="n">_paths</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">vertices</span> <span class="o">-=</span> <span class="n">xy</span>
+        <span class="c1"># 2. Then use the offset property of the collection to position the</span>
+        <span class="c1"># patches</span>
+        <span class="n">collection</span><span class="o">.</span><span class="n">set_offsets</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
+        <span class="n">collection</span><span class="o">.</span><span class="n">_transOffset</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">transData</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_edgecolors</span><span class="p">(</span><span class="n">edgecolor</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="n">linewidth</span><span class="p">)</span>
+    <span class="n">collection</span><span class="o">.</span><span class="n">set_zorder</span><span class="p">(</span><span class="n">zorder</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">collection</span></div>
+
+
+<div class="viewcode-block" id="beach_mw_depth"><a class="viewcode-back" href="../../reference/autogen/tdmtpy.image.beach_mw_depth.html#tdmtpy.image.beach_mw_depth">[docs]</a><span class="k">def</span> <span class="nf">beach_mw_depth</span><span class="p">(</span><span class="n">tensors</span><span class="p">,</span><span class="n">depth</span><span class="p">,</span><span class="n">event</span><span class="p">,</span><span class="n">show</span><span class="p">,</span><span class="nb">format</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot depth search result</span>
+
+<span class="sd">    A function that plots focal mechanism, variance reduction, and moment magnitude</span>
+<span class="sd">    as a function of source depth.</span>
+
+<span class="sd">    :param tensors: moment tensor solutions at various depths.</span>
+<span class="sd">    :type tensors: a list of :class:`~tdmtpy.tensor.Tensor`</span>
+<span class="sd">    :param depth: depth of solution with maximum variance reduction.</span>
+<span class="sd">    :type depth: float</span>
+<span class="sd">    :param event: event origin time, longitude and latitude, refer to :class:`~tdmtpy.configure.Configure`</span>
+<span class="sd">        for details.</span>
+<span class="sd">    :type event: dict</span>
+<span class="sd">    :param show: Turn on interactive display.</span>
+<span class="sd">    :type show: bool</span>
+<span class="sd">    :param format: figure file format.</span>
+<span class="sd">    :type format: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Can only be saved as a raster image due to the beach ball display</span>
+    <span class="c1"># need to find another way to fix the beach ball aspect ratios without using</span>
+    <span class="c1"># display coordinates</span>
+
+    <span class="c1"># Turn interactive plotting off</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>  <span class="c1"># only display plots when called, save figure without displaying in ipython</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mf">8.5</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">!=</span> <span class="s2">&quot;png&quot;</span><span class="p">:</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,)</span>
+
+    <span class="c1"># Axis 1 - variance reduction</span>
+    <span class="n">color1</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Depth [km]&quot;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;VR [%]&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color1</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> | </span><span class="si">%5.2f</span><span class="s2"> </span><span class="si">%5.2f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;datetime&quot;</span><span class="p">],</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="n">color2</span> <span class="o">=</span> <span class="s2">&quot;mediumblue&quot;</span>
+    <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>  <span class="c1"># instantiate a second axes that shares the same x-axis</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Mw&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color2</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="n">tensors</span><span class="p">:</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span><span class="n">tensor</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">total_VR</span><span class="p">,</span><span class="s2">&quot;o&quot;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">color1</span><span class="p">)</span>
+        <span class="n">bb</span> <span class="o">=</span> <span class="n">beach</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">m</span><span class="p">,</span>
+                   <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span><span class="n">tensor</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">total_VR</span><span class="o">+</span><span class="mi">10</span><span class="p">),</span>
+                   <span class="n">facecolor</span><span class="o">=</span><span class="n">color1</span><span class="p">,</span>
+                   <span class="n">width</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span>
+                   <span class="n">show_iso</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">axes</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span>
+                  <span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">bb</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">labelcolor</span><span class="o">=</span><span class="n">color1</span><span class="p">)</span>
+
+    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">inverted</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">mw</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color2</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">labelcolor</span><span class="o">=</span><span class="n">color2</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span> <span class="c1"># otherwise the right y-label is slightly clipped</span>
+    <span class="n">outfile</span> <span class="o">=</span> <span class="s2">&quot;depth.bbmw.</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="nb">format</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span><span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span><span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Lawrence Livermore National Security, LLC
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,310 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tdmtpy.tensor.Tensor &mdash; tdmtpy 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/OS-icon-color.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="tdmtpy.tensor.Tensor.cartesian_to_spherical" href="tdmtpy.tensor.Tensor.cartesian_to_spherical.html" />
+    <link rel="prev" title="tdmtpy.tensor.find_strike_rake_dip" href="tdmtpy.tensor.find_strike_rake_dip.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/OS-logo-horizontal-white.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#core-modules">Core Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tdmtpy.configure.html">tdmtpy.configure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tdmtpy.inversion.html">tdmtpy.inversion</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="tdmtpy.tensor.html">tdmtpy.tensor</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="tdmtpy.tensor.eigen2lune.html">tdmtpy.tensor.eigen2lune</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tdmtpy.tensor.find_fault_planes.html">tdmtpy.tensor.find_fault_planes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tdmtpy.tensor.find_strike_rake_dip.html">tdmtpy.tensor.find_strike_rake_dip</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">tdmtpy.tensor.Tensor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tdmtpy.image.html">tdmtpy.image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tdmtpy.utils.html">tdmtpy.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#scripts">Scripts</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tdmtpy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="tdmtpy.tensor.html">tdmtpy.tensor</a> &raquo;</li>
+        
+      <li>tdmtpy.tensor.Tensor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/reference/autogen/tdmtpy.tensor.Tensor.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tdmtpy-tensor-tensor">
+<h1>tdmtpy.tensor.Tensor<a class="headerlink" href="#tdmtpy-tensor-tensor" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="tdmtpy.tensor.Tensor">
+<em class="property">class </em><code class="sig-name descname">Tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tdmtpy/tensor.html#Tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tdmtpy.tensor.Tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Object containing a single six-element moment tensor</p>
+<p>A container for all things related to the moment tensor <code class="docutils literal notranslate"><span class="pre">m</span></code>.
+Optional <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> are used to write and plot inversion results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – six independent moment tensor elements in Aki and Richards (2002) convention:
+mxx, myy, mzz, mxy, mxz, myz. Units are in dyne-cm.</p></li>
+<li><p><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – source depth.</p></li>
+<li><p><strong>ts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – data shift in the number of time points.</p></li>
+<li><p><strong>weights</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – station weights.</p></li>
+<li><p><strong>station_VR</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – variance reduction at each station.</p></li>
+<li><p><strong>total_VR</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – total variance reduction.</p></li>
+<li><p><strong>dd</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – observed data stored as a single vector, required for plotting.</p></li>
+<li><p><strong>ss</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – synthetic seismograms stored as a single vector, required for plotting.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>inverted</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – inversion related parameters from <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>.</p></li>
+<li><p><strong>cmt</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – moment tensor elements in GCMT format: mrr, mtt, mpp, mrt, mrp, mtp.
+Units are in N-m.</p></li>
+<li><p><strong>iso</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – isotropic moment tensor elements.</p></li>
+<li><p><strong>dev</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – deviatoric moment tensor elements.</p></li>
+<li><p><strong>dc</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – double-couple moment tensor elements.</p></li>
+<li><p><strong>clvd</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – CLVD moment tensor elements.</p></li>
+<li><p><strong>eigenvalues</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – eigenvalues.</p></li>
+<li><p><strong>mo</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – total scalar seismic moment in Bowers and Hudson (1999) convention.
+Unit is in dyne-cm.</p></li>
+<li><p><strong>mw</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – moment magnitude in dyne-cm.</p></li>
+<li><p><strong>mw_dev</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – deviatoric moment magnitude.</p></li>
+<li><p><strong>miso</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – isotropic moment in dyne-cm.</p></li>
+<li><p><strong>mdc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – double-couple moment in dyne-cm.</p></li>
+<li><p><strong>mclvd</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – CLVD moment in dyne-cm.</p></li>
+<li><p><strong>pdc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – percentage of double-couple component.</p></li>
+<li><p><strong>pclvd</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – percentage of CLVD component.</p></li>
+<li><p><strong>piso</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – percentage of isotropic component.</p></li>
+<li><p><strong>fps</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>(</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em><em>, </em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em><em>)</em>) – strike, dip, and rake of the two fault planes.</p></li>
+<li><p><strong>lune</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>)</em>) – gamma and delta in lune source-type space.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="tdmtpy.tensor.Tensor.cartesian_to_spherical.html#tdmtpy.tensor.Tensor.cartesian_to_spherical" title="tdmtpy.tensor.Tensor.cartesian_to_spherical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cartesian_to_spherical</span></code></a></p></td>
+<td><p>Conversion from cartesian coordinates to spherical coordinates</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="tdmtpy.tensor.Tensor.decompose.html#tdmtpy.tensor.Tensor.decompose" title="tdmtpy.tensor.Tensor.decompose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decompose</span></code></a></p></td>
+<td><p>Moment tensor decomposition</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="tdmtpy.tensor.Tensor.write.html#tdmtpy.tensor.Tensor.write" title="tdmtpy.tensor.Tensor.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a></p></td>
+<td><p>Write detailed solution file</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tdmtpy.tensor.Tensor.cartesian_to_spherical.html" class="btn btn-neutral float-right" title="tdmtpy.tensor.Tensor.cartesian_to_spherical" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tdmtpy.tensor.find_strike_rake_dip.html" class="btn btn-neutral float-left" title="tdmtpy.tensor.find_strike_rake_dip" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Lawrence Livermore National Security, LLC
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
