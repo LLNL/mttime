@@ -61,4 +61,4 @@ var/
 # Sphinx documentation
 docs/build/
 docs/_exclude/
-docs/source/reference/autogen
+docs/reference/autogen
