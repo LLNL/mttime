@@ -177,7 +177,7 @@ The synthetic file names have the following format:
 * component: Z, R, or T (from the components parameter)
 * green_function_name: this depends on format of the Green's functions
 
-  * ``herrmann``: TSS, TDS, RSS, RDS, RDD, ZSS, ZDS, ZDD, REC, and ZEX (total of 10)
+  * ``herrmann``: TSS, TDS, RSS, RDS, RDD, ZSS, ZDS, ZDD, REX, and ZEX (total of 10)
   * ``tensor``: ZXX, ZYY, ZZZ, ZXY, ZXZ, ZYZ, RXX, etc. (total of 18)
 
 With the example above the synthetic file names for station BK.CMB.00 are:
