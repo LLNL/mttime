@@ -47,11 +47,6 @@ Finally, if you want to run the tutorials you will need to install `Jupyter Note
 Usage
 -----
 
-You can execute the package from the command line or run it interactively in the Python console.
-In either case you will need to provide an input file that contains information about the
-file structure and parameters to set up the inverse routine.
-If no file is given the code will look for a file named `mtinv.in` in the current working directory.
-
 Executing the package from command line will launch the inversion,
 save and plot the result to file:
 
@@ -69,11 +64,11 @@ The equivalent in the Python console:
    mt.invert()
    mt.write()
 
-Refer to the `User Guide <https://github.com/LLNL/tdmtpy/wiki/User-Guide>`_ for more details.
-
-Tutorials
+Resources
 ---------
-Check out the Jupyter Notebooks for a working example.
+
+* `Documentation for tdmtpy <https://tdmtpy.readthedocs.io/en/latest/index.html>`_
+* `A working example <https://github.com/LLNL/tdmtpy/tree/master/examples/notebooks>`_
 
 License
 -------
