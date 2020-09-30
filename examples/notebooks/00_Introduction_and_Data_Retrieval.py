@@ -6,15 +6,15 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.6.0
+#       jupytext_version: 1.5.2
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: obspy
 #     language: python
-#     name: python3
+#     name: obspy
 # ---
 
 # ### Example: 2019-07-16 Earthquake near Byron, California
-# Prepared by Andrea Chiang, chiang4@llnl.gov
+# Prepared by Andrea Chiang, andrea@llnl.gov
 #
 # USGS event information URL https://earthquake.usgs.gov/earthquakes/eventpage/nc73225421/executive
 #
@@ -27,7 +27,7 @@
 #
 # To run this tutorial you will need Python 3+ and the following packages:
 # * ObsPy
-# * Pandas
+# * pandas
 # * matplotlib
 # * NumPy
 # * tdmtpy
@@ -47,7 +47,7 @@ from obspy.clients.fdsn.mass_downloader import CircularDomain, Restrictions, Mas
 # ```
 
 # +
-event_bool = False
+event_bool = True
 
 if event_bool:
     dataCenter="IRIS"
@@ -58,7 +58,7 @@ if event_bool:
                         minmagnitude=4,maxmagnitude=5,
                         minlatitude=36, maxlatitude=38,
                         minlongitude=-122, maxlongitude=-120)
-    catalog.write("quakes.xml"%evid,format="QUAKEML")
+    catalog.write("quakes.xml",format="QUAKEML")
 
 # -
 
