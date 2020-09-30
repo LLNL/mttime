@@ -10,7 +10,7 @@ to moment tensor inversion should check out the Jupyter Notebook
 `tutorials <https://github.com/LLNL/tdmtpy/tree/master/examples/notebooks>`_
 for an complete example that includes data processing and synthetics calculation.
 
-Further information on any specific method can be obtained in the API reference.
+Further information on any specific method can be obtained in the :ref:`api`.
 
 Basics
 ------

@@ -20,7 +20,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../src'))
+sys.path.insert(0, os.path.abspath('../../src'))
 
 # -- Project information -----------------------------------------------------
 
@@ -124,8 +124,6 @@ nitpicky = True
 nitpick_ignore = [('py:class', 'type')]
 
 # -- Options for HTML output -------------------------------------------------
-
-#import sphinx_bootstrap_theme
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
