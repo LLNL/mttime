@@ -8,8 +8,8 @@ Current release is version 1.0.
 
 - Added new plotting routines, map view and lune.
 
-1.0   (2020-09-25)
-------------------
+1.0.0   (2020-09-25)
+--------------------
 
 - Modifications to package structure, objects and functions.
 - pandas is now required.
