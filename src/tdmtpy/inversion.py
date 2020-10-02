@@ -519,7 +519,7 @@ class Inversion(object):
         """
         view = kwargs.get("view", "normal")
         show = kwargs.get("show", False)
-        format = kwargs.get("format","eps")
+        format = kwargs.get("format","png")
         if view == "normal":
             option = kwargs.get("option", None)
             args = (self.config.inv_type, self.config.components, self.config.df, show, format)

@@ -287,7 +287,7 @@ def beach_mw_depth(tensors,depth,event,show,format):
     # Turn interactive plotting off
     plt.ioff()  # only display plots when called, save figure without displaying in ipython
 
-    fig = plt.figure(dpi=300)
+    fig = plt.figure()
     fig.set_size_inches(8.5,5)
     if format != "png":
         ax1 = fig.add_subplot(1, 1, 1, rasterized=True)
@@ -318,7 +318,7 @@ def beach_mw_depth(tensors,depth,event,show,format):
         bb = beach(tensor.m,
                    xy=(tensor.inverted.depth,tensor.inverted.total_VR+10),
                    facecolor=color1,
-                   width=90,
+                   width=45,
                    show_iso=True,
                    axes=ax1,
                   )
