@@ -510,7 +510,7 @@ class Inversion(object):
         :type view: str
         :param show: If ``True`` will show the plot interactively after plotting, default is ``False``.
         :type show: bool
-        :param format: figure file format, default is ``"eps"``.
+        :param format: figure file format, default is ``"png"``.
         :type format: str
         :param option: Additional parameter if view is set to ``normal``. The default plots all
             solutions. Set to ``preferred`` to plot only the preferred solution.
