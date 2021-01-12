@@ -238,7 +238,11 @@ class Configure(object):
             raise ValueError("green not supported.")
         self.green = kwargs["green"].lower()
         kwargs["components"] = kwargs.get("components", "ZRT")
-        if any(c == kwargs["components"].upper() for c in ("Z", "ZRT")):
+        if any(c == kwargs["components"].upper() for c in ("Z", "ZRT", "ZNE")):
+            if kwargs["components"].upper() == "ZNE":
+                self.rotate_to_zne = True
+            else:
+                self.rotate_to_zne = False
             self.components = list(kwargs["components"].upper())
         else:
             raise ValueError("components not supported.")

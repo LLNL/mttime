@@ -1,0 +1,14 @@
+datetime       2019-07-16T20:10:31.473
+longitude      -117.934
+latitude       35.0539
+depth          2.0000
+path_to_data   data
+path_to_green  .
+green          rgf
+components     ZNE
+degree         5
+weight         distance
+plot           1
+correlate      0
+station distance azimuth ts npts dt used longitude latitude signalfilter nc zerophase lcrn hcrn model
+AB.CDE.00	2.8258	45 100 500 0.01 1	-117.956  35.0359  bandpass 2 True 0.1 2  sw4

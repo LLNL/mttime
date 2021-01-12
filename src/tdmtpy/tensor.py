@@ -200,7 +200,7 @@ class Tensor(object):
         # Optional keywords default to None
         inverted = AttribDict()
 
-        keys = ["depth","ts","weights","station_VR","total_VR","dd","ss"]
+        keys = ["depth","components","ts","weights","station_VR","total_VR","dd","ss"]
         # Update given key by their given value
         for key, value in kwargs.items():
             if key in keys:
@@ -346,7 +346,7 @@ class Tensor(object):
             :class:`~tdmtpy.inversion.Inversion`.
         :type df: :class:`~pandas.DataFrame`
         """
-        filename = "d%7.4f.mtinv.out" %self.inverted.depth
+        filename = "d%07.4f.mtinv.out" %self.inverted.depth
         self.cartesian_to_spherical()
         out = ("{type:s} Moment Tensor Inversion\n"
                "Depth = {depth:7.4f} (km)\n"
@@ -365,7 +365,7 @@ class Tensor(object):
                 "GCMT convention (N-m)\n"
                 "Mrr        Mtt        Mpp        Mrt        Mrp        Mtp\n"
                 "{cmt[0]:<10.3e} {cmt[1]:<10.3e} {cmt[2]:<10.3e} {cmt[3]:<10.3e} {cmt[4]:<10.3e} {cmt[5]:<10.3e}\n\n"
-                "Eigenvalues: {eigenvalues[0]:.3e} {eigenvalues[1]:.3e}\n"
+                "Eigenvalues: {eigenvalues[0]:.3e} {eigenvalues[1]:.3e} {eigenvalues[2]:.3e}\n"
                 "Lune Coordinates: {lune[0]:<6.2f} {lune[1]:<6.2f}\n"
                 "Station Information\n"
                )
@@ -419,7 +419,7 @@ class Tensor(object):
                  "Depth = {depth:.4f} km\n"
                  "Mw = {mw:.2f}\n"
                  "Percent DC/CLVD/ISO = {pdc:.0f}/{pclvd:.0f}/{piso:.0f}\n"
-                 "VR = {VR:.2f}%%\n"
+                 "VR = {VR:.2f}%\n"
                  )
         annot = annot.format(inv_type=inv_type,
                              depth=self.inverted.depth,
@@ -456,7 +456,7 @@ class Tensor(object):
         datacol[df[components] == 0] = '0.5'
 
         for page, group in enumerate(pages):
-            f, ax0, ax1 = new_page(len(group), nrows+1, ncols, annot=annot)
+            f, ax0, ax1 = new_page(len(group), nrows+1, ncols, annot=annot,title=self.inverted.components)
             # Plot beach balls
             for i in range(len(fm)):
                 beach1 = beach(fm[i], xy=(i + 0.5 * i, 0), width=fm_width[i], show_iso=True)
@@ -466,7 +466,7 @@ class Tensor(object):
             ax0.text(fm_sign[1], 0, '+', horizontalalignment='center', verticalalignment='center')
             # Plot stations around beach ball
             for xi,yi,azi,col in zip(x,y,df.azimuth,tri_color):
-                ax0.plot(xi, yi, marker=(3, 0, -1*azi), color=col, zorder=101)
+                ax0.plot(xi, yi, marker=(3, 0, -1*azi), color=col, zorder=101, markersize=5)
             # Plot waveforms
             for i, stat in enumerate(group):
                 t = np.arange(0, df.npts[stat] * df.dt[stat], df.dt[stat])
@@ -475,33 +475,32 @@ class Tensor(object):
                 ymin = np.min([data, synt])
                 ymax = np.max([data, synt])
                 for j in range(len(components)):
-                    ax1[i, j].plot(t, data[:, j], color=datacol[stat, j])
-                    ax1[i, j].plot(t, synt[:, j], color=syntcol[stat, j], dashes=[6, 2])
+                    ax1[i, j].plot(t, data[:, j], color=datacol[stat, j], clip_on=False)
+                    ax1[i, j].plot(t, synt[:, j], color=syntcol[stat, j], dashes=[6, 2], clip_on=False)
                     ax1[i, j].set_ylim(ymin, ymax)
                     ax1[i, j].set_xlim(0, t[-1])
                 # Set ticks and labels
                 ax1[i, 0].set_yticks([ymin, 0, ymax])
                 ax1[i, 0].set_yticklabels(['%.2e' % ymin, '0', '%.2e' % ymax])
-                # Station name
-                ax1[i, 0].text(0, ymax, df.station[stat],
-                               fontsize=8, fontweight='bold', verticalalignment='bottom')
-                # Distance and azimuth
-
+                # Station name, distance and azimuth
                 if df.distance[stat] > 10:
                     dist = ("{0:.0f}")
                 else:
                     dist = ("{0:.4f}")
                 dist = dist.format(df.distance[stat])
-                ax1[i, 0].text(t[-1],ymax,
-                               r'$\mathit{r},\varphi$=%s,%-.0f' % (
-                               dist, df.azimuth[stat]),
-                               fontsize=7, horizontalalignment="right",verticalalignment="bottom")
+                label = '\n'.join([df.station[stat],
+                                  r'$\Delta,\theta$=%s,%-.0f' % (dist, df.azimuth[stat])
+                                  ])
+                ax1[i, 0].text(0,ymax, label, verticalalignment="bottom")
                 # Sample shift and VR
                 ax1[i, 1].text(t[-1], ymax,
                                'ts,VR=%d,%.0f'%(self.inverted.ts[stat], self.inverted.station_VR[stat]),
-                               fontsize=7,horizontalalignment="right",verticalalignment="bottom")
+                               horizontalalignment="right",verticalalignment="bottom")
+            # Label last row only
+            for column in range(3):
+                ax1[i, column].set_xlabel('Time [s]')
 
-            outfile = "bbwaves.d%7.4f.%02d.%s"%(self.inverted.depth,page,format)
+            outfile = "bbwaves.d%07.4f.%02d.%s"%(self.inverted.depth,page,format)
             f.savefig(outfile,format=format,bbox_inches="tight")
             if show:
                 plt.show()

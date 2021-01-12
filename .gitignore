@@ -62,3 +62,6 @@ var/
 docs/build/
 docs/_exclude/
 docs/reference/autogen
+
+# ipython notebooks
+.ipynb_checkpoints

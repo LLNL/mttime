@@ -22,7 +22,7 @@ to obtain the seismic moment tensor.
 # dev branch marker is "X.Y.devN" where N is an integer.
 # X.Y.dev0 is the canonical version of X.Y.dev
 
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 
 from .configure import Configure
 from .inversion import Inversion

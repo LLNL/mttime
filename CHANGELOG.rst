@@ -1,10 +1,16 @@
 Changelog
 =========
 
-Current release is version 1.0.
+Current release is version 1.0.2
 
-1.0.dev1
---------
+1.0.2
+-----
+
+- Added support for data/synthetics in cartesian NED coordinates.
+- Added utility function to read SW4 reciprocal Green's functions.
+
+1.0.1
+-----
 
 - Added new plotting routines, map view and lune.
 
