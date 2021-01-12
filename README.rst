@@ -12,6 +12,7 @@ The package was developed on python 3.7 and 3.8, and is running and tested on Ma
 
 * ObsPy 1.0.* and its dependencies
 * pandas 1.0.*
+* cartopy (for plotting maps)
 
 Installation
 ------------
