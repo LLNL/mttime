@@ -140,6 +140,28 @@ def RGF_from_SW4(path_to_green=".", t0=0, file_name=None,
     
     Assumes the following file structure:
     f[x,y,z]/station_name/event_name.[x,y,z]
+    
+    :param path_to_green: path to RGFs.
+    :type path_to_green: str
+    :param t0: offset in time (>=0).
+    :type t0: float
+    :param file_name: name of RGF sac files from SW4 (event name).
+    :type file_name: str
+    :param origin_time: event origin time.
+    :param event_lat: event latitude.
+    :type event_lat: float
+    :param event_lon: event longitude
+    :type event_lon: float
+    :param depth: source depth
+    :type depth: float
+    :param station_name: station names.
+    :type station_name: list of strings.
+    :param station_lat: station latitudes.
+    :type station_lat: list of floats
+    :param station_lon: station longitudes.
+    :type station_lon: list of floats
+    :param output_directory: output direcotry.
+    :type output_directory: str
     """
 
     import os

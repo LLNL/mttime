@@ -52,7 +52,8 @@ class Configure(object):
         Defaults to ``"herrmann"``.
     :type green: str
     :param components: waveform components, options are ``"Z"`` for vertical component,
-        or ``"ZRT"`` for three-component data in vertical, radial and transverse components.
+        or ``"ZRT"`` for three-component data in vertical, radial and transverse components, and
+        ``"ZNE"`` for vertica, north and east.
         Defaults to ``"ZRT"``.
     :type components: list of str
     :param degree: degrees of freedom allowed in the inversion, options are ``5`` for deviatoric
