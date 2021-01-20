@@ -461,7 +461,7 @@ class Tensor(object):
             for i in range(len(fm)):
                 beach1 = beach(fm[i], xy=(i + 0.5 * i, 0), width=fm_width[i], show_iso=True)
                 ax0.add_collection(beach1)
-                ax0.text(i + 0.5 * i, 0.55, fm_title[i], horizontalalignment='center')
+                ax0.text(i + 0.5 * i, 0.55, fm_title[i], horizontalalignment='center', fontsize=8)
             ax0.text(fm_sign[0], 0, '=', horizontalalignment='center', verticalalignment='center')
             ax0.text(fm_sign[1], 0, '+', horizontalalignment='center', verticalalignment='center')
             # Plot stations around beach ball
@@ -491,11 +491,11 @@ class Tensor(object):
                 label = '\n'.join([df.station[stat],
                                   r'$\Delta,\theta$=%s,%-.0f' % (dist, df.azimuth[stat])
                                   ])
-                ax1[i, 0].text(0,ymax, label, verticalalignment="bottom")
+                ax1[i, 0].text(0,ymax, label, verticalalignment="bottom",fontsize=6)
                 # Sample shift and VR
                 ax1[i, 1].text(t[-1], ymax,
                                'ts,VR=%d,%.0f'%(self.inverted.ts[stat], self.inverted.station_VR[stat]),
-                               horizontalalignment="right",verticalalignment="bottom")
+                               horizontalalignment="right",verticalalignment="bottom",fontsize=6)
             # Label last row only
             for column in range(3):
                 ax1[i, column].set_xlabel('Time [s]')

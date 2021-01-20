@@ -1,5 +1,4 @@
 Deviatoric Moment Tensor Inversion
-
 Depth = 20.0000 (km)
 Mo = 3.972e+22 (dyne-cm)
 Mw = 4.37
@@ -18,9 +17,8 @@ GCMT convention (N-m)
 Mrr        Mtt        Mpp        Mrt        Mrp        Mtp
 1.551e+13  -3.615e+15 3.600e+15  5.882e+14  -5.045e+14 1.350e+15 
 
-Eigenvalues: 3.884e+22 8.794e+20
+Eigenvalues: 3.884e+22 8.794e+20 -3.972e+22
 Lune Coordinates: 1.11   0.00  
-
 Station Information
     station  distance  azimuth  ts  npts   dt  Z  R  T weights     VR  longitude  latitude
  BK.QRDG.00     80.99   335.29  31   150  1.0  1  1  1  1.0000  88.92    -122.14     38.48

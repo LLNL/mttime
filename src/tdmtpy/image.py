@@ -32,11 +32,11 @@ import cartopy.io.img_tiles as cimgt
 ppi = 72 # 72 pts per inch
 dpi = 300
 SMALL_SIZE = 6
-MEDIUM_SIZE = 8
+MEDIUM_SIZE = 7
 BIGGER_SIZE = 10
 plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=SMALL_SIZE)     # axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # x and y labels
+plt.rc('axes', labelsize=SMALL_SIZE)    # x and y labels
 plt.rc('xtick', labelsize=SMALL_SIZE)    # tick labels
 plt.rc('ytick', labelsize=SMALL_SIZE)
 plt.rc('legend', fontsize=SMALL_SIZE)    # legend
@@ -65,7 +65,7 @@ def new_page(nsta,nrows,ncols,annot="",offset=2,figsize=(4.75,9.00),title=("Z","
     
     # Annotations and beach balls
     ax0 = f.add_subplot(gs[0:offset,:],xlim=(-5,3.55),ylim=(-0.75,0.6),aspect="equal")
-    ax0.text(-5,0,annot,verticalalignment='center')
+    ax0.text(-5,0,annot,verticalalignment='center',fontsize=MEDIUM_SIZE)
     ax0.set_axis_off()
 
     # Waveforms
@@ -85,9 +85,9 @@ def new_page(nsta,nrows,ncols,annot="",offset=2,figsize=(4.75,9.00),title=("Z","
     adjust_spines(ax1[-1,2],['bottom'])
     
     # Title
-    ax1[0,0].set_title(title[0],verticalalignment='bottom',pad=15)
-    ax1[0,1].set_title(title[1],verticalalignment='bottom',pad=15)
-    ax1[0,2].set_title(title[2],verticalalignment='bottom',pad=15)
+    ax1[0,0].set_title(title[0],verticalalignment='bottom',pad=15, fontsize=BIGGER_SIZE)
+    ax1[0,1].set_title(title[1],verticalalignment='bottom',pad=15, fontsize=BIGGER_SIZE)
+    ax1[0,2].set_title(title[2],verticalalignment='bottom',pad=15, fontsize=BIGGER_SIZE)
     
     return (f,ax0,ax1)
 
@@ -323,7 +323,7 @@ def beach_map(m,event,stlo,stla,distance,show,format,zoom_level=8):
     stamen_terrain = cimgt.Stamen('terrain-background')
     projection = stamen_terrain.crs
 
-    fig = plt.figure(dpi=300)
+    fig = plt.figure(dpi=dpi)
     fig.set_size_inches(8.5,11)
     if format != "png":
         ax = fig.add_subplot(1, 1, 1, projection=projection,rasterized=True)  # axes coordinates
@@ -509,7 +509,10 @@ def beach_mw_depth(tensors,depth,event,show,format,figsize=(3.54,3.00)):
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     ax2.set_ylabel("Mw", color=color2)
     source_depth = [tensor.inverted.depth for tensor in tensors]
-    ax2.set_xlim([min(source_depth), max(source_depth)])
+    white_space = (max(source_depth)-min(source_depth))/6
+    if white_space == 0:
+        white_space = 1.0
+    ax2.set_xlim([min(source_depth)-white_space, max(source_depth)+white_space])
     ax2.set_ylim([0, 12])
     ax2.set_yticks([0, 2, 4, 6, 8, 10])
     ax2.set_yticklabels([0, 2, 4, 6, 8, 10])
@@ -521,7 +524,7 @@ def beach_mw_depth(tensors,depth,event,show,format,figsize=(3.54,3.00)):
         bb = beach(tensor.m,
                    xy=(tensor.inverted.depth,tensor.inverted.total_VR+10),
                    facecolor=color1,
-                   width=20,
+                   width=45,
                    show_iso=True,
                    axes=ax1,
                   )

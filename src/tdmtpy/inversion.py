@@ -31,6 +31,8 @@ class Inversion(object):
     :var preferred_tensor_id: index to the preferred moment tensor solution
         (maximum variance reduction).
     :vartype preferred_tensor_id: int
+    :var orientation: orientation of seismic data and synthetics, default is `"ZRT"`.
+    :
     """
     def __init__(self, config=None):
         """
@@ -40,6 +42,7 @@ class Inversion(object):
         self.streams = None # a list of data streams
         self.moment_tensors = None
         self.preferred_tensor_id = None
+        self.orientation = "ZRT" # to check for rotation
 
     def load_data(self):
         """
@@ -82,7 +85,7 @@ class Inversion(object):
 
         self.streams = streams
 
-    def invert(self):
+    def invert(self,show=False):
         """
         Launch the inversion
 
@@ -126,9 +129,9 @@ class Inversion(object):
         self.moment_tensors = tensors
 
         if self.config.plot:
-            self.plot(view="normal")
+            self.plot(view="normal",show=show)
             if len(self.config.depth) > 1:
-                self.plot(view="depth")
+                self.plot(view="depth",show=show)
 
         self._cleanup()
 
@@ -190,6 +193,7 @@ class Inversion(object):
 
         # Save solution
         kwargs = dict(depth=depth,
+                      components=self.config.components.copy(),
                       ts=self.config.df.ts.values.copy(),
                       weights=self.config.df.weights.values.copy(),
                       station_VR=station_VR,
@@ -202,6 +206,7 @@ class Inversion(object):
         #    # Reshape for plotting
         #    dd, ss = self._reshape_d_Gm(Gm)
         #    kwargs.update(dd=dd,ss=ss)
+
         mt = Tensor(m*1e20, **kwargs) # Green's functions are in 1e20 dyne-cm
         mt.decompose()
 
@@ -238,6 +243,8 @@ class Inversion(object):
         method = options[self.config.green][0]
         bases = options[self.config.green][1]
         files = self.config.path_to_green + "/" + self.config.df.station + "." + "%.4f" % depth
+
+        # Call function based on GF format
         call_green_function = getattr(self, method)
         call_green_function(bases, files)
 
@@ -275,7 +282,7 @@ class Inversion(object):
 
     def _green_herrmann(self, bases, files):
         """
-        Function to read Green's function in herrmann format
+        Function to read Green's function in Herrmann format
 
         A function that relates the Green's functions in the formulation of Herrmann and Wang (1985)
         to a moment tensor source.
@@ -290,10 +297,17 @@ class Inversion(object):
         # 4='RSS', 5='RDS', 6='RDD', 7='REX'
         # 8='TSS', 9='TDS'
 
-        cbases = ["".join([c, basis]) for c in self.config.components for basis in bases]
-        if "T" in self.config.components:
+        if self.config.ncomp == 3:
+            components = ["Z","R","T"]
+        elif self.config.ncomp ==1 :
+            components = ["Z"]
+        cbases = ["".join([c, basis]) for c in components for basis in bases]
+        # Remove zero value components
+        try:
             cbases.remove("TDD")
             cbases.remove("TEX")
+        except IndexError as e:
+            print(e)
 
         # Read synthetics
         # Construct Green's function vector using equations 6, 7 and 8f rom Minson and Dreger, 2008 (GJI)
@@ -351,6 +365,24 @@ class Inversion(object):
                     G[b[1]:e[1], 5] = 0.33333 * gg[:, 6] + 0.33333 * gg[:, 7]  # mzz
 
         self.G = G
+
+        if self.config.rotate_to_zne:
+            self._rotate_rt_to_ne()
+
+    def _rotate_rt_to_ne(self):
+        """
+        Rotate horizontal component Green's functions
+        """
+        for i in range(self.config.nsta):
+            rad_start = self.config.index1[i, 1]
+            rad_end = self.config.index2[i, 1]
+            tan_start = self.config.index1[i, 2]
+            tan_end = self.config.index2[i, 2]
+            r = self.G[rad_start:rad_end]
+            t = self.G[tan_start:tan_end]
+            n, e = utils.rotate_rt2ne(r, t, self.config.df.azimuth[i])
+            self.G[rad_start:rad_end] = n
+            self.G[tan_start:tan_end] = e
 
     @staticmethod
     def _save_fundamental_fault_types(syn, gg, b, e, degree, ncomp):
@@ -506,7 +538,8 @@ class Inversion(object):
 
         :param view: type of figure to produce. Default ``normal`` creates the standard figure with focal mechanisms
             and waveform fits. ``depth`` shows the focal mechanism and moment magnitude as a
-            function of depth.
+            function of depth. ``map`` plots stations and focal mechanisms on a terrain background.
+            ``lune`` plots the moment tensor source-type on a lune.
         :type view: str
         :param show: If ``True`` will show the plot interactively after plotting, default is ``False``.
         :type show: bool
@@ -528,10 +561,28 @@ class Inversion(object):
             else:
                 for tensor in self.moment_tensors:
                     tensor._beach_waveforms_3c(*args)
+        elif view == "map":
+            if self.config.event is None:
+                print("Event origin is missing, cannot plot in map view.")
+            else:
+                from .image import beach_map
+                m = self.get_preferred_tensor().m
+                args = (self.config.event,
+                        self.config.df.longitude.values,
+                        self.config.df.latitude.values,
+                        self.config.df.distance.values,
+                        show,
+                        format,
+                       )
+                beach_map(m,*args)
         elif view == "depth":
             from .image import beach_mw_depth
             depth = self.get_preferred_tensor().inverted.depth
             beach_mw_depth(self.moment_tensors,depth,self.config.event,show,format)
+        elif view == "lune":
+            from .image import plot_lune
+            gamma,delta = self.get_preferred_tensor().lune
+            plot_lune(gamma,delta,show,format)
 
     def _cleanup(self):
         del self.d
