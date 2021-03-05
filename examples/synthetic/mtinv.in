@@ -2,8 +2,8 @@ origin         2019-07-16T20:10:31.473
 longitude      -121.757
 latitude       37.8187
 depth          10,20
-path_to_data   dc
-path_to_green  gf
+path_to_data   earthquake
+path_to_green  greens
 green          herrmann
 components     ZRT
 degree         5
