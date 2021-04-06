@@ -451,9 +451,10 @@ class Tensor(object):
         syntcol = np.empty(df[components].shape, dtype='<U5')
         syntcol[df[components] == 1] = 'green'
         syntcol[df[components] == 0] = '0.5'
-        datacol = np.empty(df[components].shape, dtype='<U5')
-        datacol[df[components] == 1] = 'black'
-        datacol[df[components] == 0] = '0.5'
+        #datacol = np.empty(df[components].shape, dtype='<U5')
+        #datacol[df[components] == 1] = 'black'
+        #datacol[df[components] == 0] = '0.5'
+        datacol = "black"
 
         for page, group in enumerate(pages):
             f, ax0, ax1 = new_page(len(group), nrows+1, ncols, annot=annot,title=self.inverted.components)
@@ -461,7 +462,7 @@ class Tensor(object):
             for i in range(len(fm)):
                 beach1 = beach(fm[i], xy=(i + 0.5 * i, 0), width=fm_width[i], show_iso=True)
                 ax0.add_collection(beach1)
-                ax0.text(i + 0.5 * i, 0.55, fm_title[i], horizontalalignment='center', fontsize=8)
+                ax0.text(i + 0.5 * i, 0.55, fm_title[i], horizontalalignment='center')
             ax0.text(fm_sign[0], 0, '=', horizontalalignment='center', verticalalignment='center')
             ax0.text(fm_sign[1], 0, '+', horizontalalignment='center', verticalalignment='center')
             # Plot stations around beach ball
@@ -475,7 +476,7 @@ class Tensor(object):
                 ymin = np.min([data, synt])
                 ymax = np.max([data, synt])
                 for j in range(len(components)):
-                    ax1[i, j].plot(t, data[:, j], color=datacol[stat, j], clip_on=False)
+                    ax1[i, j].plot(t, data[:, j], color=datacol, clip_on=False)
                     ax1[i, j].plot(t, synt[:, j], color=syntcol[stat, j], dashes=[6, 2], clip_on=False)
                     ax1[i, j].set_ylim(ymin, ymax)
                     ax1[i, j].set_xlim(0, t[-1])
@@ -491,20 +492,21 @@ class Tensor(object):
                 label = '\n'.join([df.station[stat],
                                   r'$\Delta,\theta$=%s,%-.0f' % (dist, df.azimuth[stat])
                                   ])
-                ax1[i, 0].text(0,ymax, label, verticalalignment="bottom",fontsize=6)
+                ax1[i, 0].text(0,ymax, label, verticalalignment="bottom")
                 # Sample shift and VR
                 ax1[i, 1].text(t[-1], ymax,
                                'ts,VR=%d,%.0f'%(self.inverted.ts[stat], self.inverted.station_VR[stat]),
-                               horizontalalignment="right",verticalalignment="bottom",fontsize=6)
+                               horizontalalignment="right",verticalalignment="bottom")
             # Label last row only
             for column in range(3):
                 ax1[i, column].set_xlabel('Time [s]')
 
-            outfile = "bbwaves.d%07.4f.%02d.%s"%(self.inverted.depth,page,format)
-            f.savefig(outfile,format=format,bbox_inches="tight")
+
             if show:
                 plt.show()
             else:
+                outfile = "bbwaves.d%07.4f.%02d.%s" % (self.inverted.depth, page, format)
+                f.savefig(outfile, format=format, transparent=True)
                 plt.close(f)
 
     def __str__(self):

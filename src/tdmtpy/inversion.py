@@ -541,9 +541,10 @@ class Inversion(object):
             function of depth. ``map`` plots stations and focal mechanisms on a terrain background.
             ``lune`` plots the moment tensor source-type on a lune.
         :type view: str
-        :param show: If ``True`` will show the plot interactively after plotting, default is ``False``.
+        :param show: If ``True`` will display figure after plotting and not save image to file,
+            default is ``False``.
         :type show: bool
-        :param format: figure file format, default is ``"png"``.
+        :param format: figure file format, default is ``"eps"``.
         :type format: str
         :param option: Additional parameter if view is set to ``normal``. The default plots all
             solutions. Set to ``preferred`` to plot only the preferred solution.
@@ -552,7 +553,7 @@ class Inversion(object):
         """
         view = kwargs.get("view", "normal")
         show = kwargs.get("show", False)
-        format = kwargs.get("format","png")
+        format = kwargs.get("format","eps")
         if view == "normal":
             option = kwargs.get("option", None)
             args = (self.config.inv_type, self.config.components, self.config.df, show, format)
@@ -567,10 +568,12 @@ class Inversion(object):
             else:
                 from .image import beach_map
                 m = self.get_preferred_tensor().m
+
                 args = (self.config.event,
                         self.config.df.longitude.values,
                         self.config.df.latitude.values,
                         self.config.df.distance.values,
+                        self.config.df[self.config.components].sum(axis=1).astype(bool).values,
                         show,
                         format,
                        )

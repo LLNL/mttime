@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # SPDX-License-Identifier: (LGPL-3.0)
 # LLNL-CODE-814839
-# author: Andrea Chiang (andrea4@llnl.gov)
+# author: Andrea Chiang (andrea@llnl.gov)
 """
 Plotting routines for tdmtpy
 
@@ -13,12 +13,9 @@ Plotting routines for tdmtpy
 
 
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.path as mpath
 
-from matplotlib.gridspec import GridSpec
-import matplotlib.collections as mpl_collections
-from matplotlib import patches, transforms
 from obspy.imaging.beachball import xy2patch
 from obspy.imaging.scripts.mopad import BeachBall as mopad_BeachBall
 from obspy.imaging.scripts.mopad import MomentTensor as mopad_MomentTensor
@@ -26,24 +23,27 @@ from obspy.imaging.scripts.mopad import epsilon
 
 from obspy.geodetics.base import kilometers2degrees
 import cartopy.crs as ccrs
-import cartopy.io.img_tiles as cimgt
+import cartopy.feature as cfeature
 
 # Figure defaults
 ppi = 72 # 72 pts per inch
+mm = 1/25.4 # mm in inches
 dpi = 300
-SMALL_SIZE = 6
-MEDIUM_SIZE = 7
-BIGGER_SIZE = 10
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=SMALL_SIZE)     # axes title
-plt.rc('axes', labelsize=SMALL_SIZE)    # x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)    # tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)
-plt.rc('legend', fontsize=SMALL_SIZE)    # legend
-plt.rc('figure', titlesize=BIGGER_SIZE)  # figure title
-plt.rc('lines', linewidth=1)
+LINEWIDTH = 2.5/(dpi/ppi)
+mpl.rcParams['pdf.fonttype'] = 42
+mpl.rcParams['ps.fonttype'] = 42
+plt.rcParams['figure.dpi'] = 100
+plt.rcParams['savefig.dpi'] = 300
+mpl.rcParams["font.sans-serif"] = ["Arial"]
+mpl.rcParams["font.family"] = "sans-serif"
+mpl.rcParams["font.size"] = 8.
+mpl.rcParams["xtick.labelsize"]
+mpl.rcParams["lines.linewidth"] = LINEWIDTH
+mpl.rcParams["lines.markeredgewidth"] = LINEWIDTH
+mpl.rcParams["patch.linewidth"] = LINEWIDTH
 
-def new_page(nsta,nrows,ncols,annot="",offset=2,figsize=(4.75,9.00),title=("Z","R","T")):
+
+def new_page(nsta,nrows,ncols,annot="",offset=2,figsize=(190*mm, 230*mm),title=("Z","R","T")):
     """
     Creates a new figure
 
@@ -56,16 +56,16 @@ def new_page(nsta,nrows,ncols,annot="",offset=2,figsize=(4.75,9.00),title=("Z","
     :param ncols: number of components to plot per page.
     :param annot: figure annotations.
     :param offset: offset between waveform traces.
-    :param figsize: figure dimension (width,height) in inches.
+    :param figsize: figure dimension (width,height) in mm.
     :return: figure container, axis of the focal mechanism plot, and axes for the waveform traces.
     :rtype: class:`~matplotlib.figure.Figure`, :class:`~matplotlib.axes.Axes`, list
     """
-    gs = GridSpec(nrows+offset,ncols,hspace=0.6,wspace=0.15)
-    f = plt.figure(figsize=figsize,dpi=dpi)
+    gs = mpl.gridspec.GridSpec(nrows+offset,ncols,hspace=0.6,wspace=0.15)
+    f = plt.figure(figsize=figsize)
     
     # Annotations and beach balls
     ax0 = f.add_subplot(gs[0:offset,:],xlim=(-5,3.55),ylim=(-0.75,0.6),aspect="equal")
-    ax0.text(-5,0,annot,verticalalignment='center',fontsize=MEDIUM_SIZE)
+    ax0.text(-5,0,annot,verticalalignment='center')
     ax0.set_axis_off()
 
     # Waveforms
@@ -85,9 +85,9 @@ def new_page(nsta,nrows,ncols,annot="",offset=2,figsize=(4.75,9.00),title=("Z","
     adjust_spines(ax1[-1,2],['bottom'])
     
     # Title
-    ax1[0,0].set_title(title[0],verticalalignment='bottom',pad=15, fontsize=BIGGER_SIZE)
-    ax1[0,1].set_title(title[1],verticalalignment='bottom',pad=15, fontsize=BIGGER_SIZE)
-    ax1[0,2].set_title(title[2],verticalalignment='bottom',pad=15, fontsize=BIGGER_SIZE)
+    ax1[0,0].set_title(title[0],verticalalignment='bottom',pad=15)
+    ax1[0,1].set_title(title[1],verticalalignment='bottom',pad=15)
+    ax1[0,2].set_title(title[2],verticalalignment='bottom',pad=15)
     
     return (f,ax0,ax1)
 
@@ -122,7 +122,7 @@ def adjust_spines(ax,spines):
         ax.xaxis.set_ticks([])
 
 
-def beach(fm, linewidth=1, facecolor='0.75', bgcolor='w', edgecolor='k',
+def beach(fm, linewidth=LINEWIDTH, facecolor='0.75', bgcolor='w', edgecolor='k',
           alpha=1.0, xy=(0, 0), width=200, size=100, nofill=False,
           zorder=100, mopad_basis='NED', axes=None, show_iso=False):
     """
@@ -138,7 +138,7 @@ def beach(fm, linewidth=1, facecolor='0.75', bgcolor='w', edgecolor='k',
         The moment tensor elements are given for a coordinate system with axes pointing
         in three directions. Default is North, East and Down.
     :type fm: list
-    :param linewidth: width of nodal and border lines. Default is ``1``.
+    :param linewidth: width of nodal and border lines. Default is ``0.8``.
     :type linewidth: float
     :param facecolor: color or shade of the compressive quadrants.
         Default is ``0.75`` (gray).
@@ -164,7 +164,8 @@ def beach(fm, linewidth=1, facecolor='0.75', bgcolor='w', edgecolor='k',
         system below. Default is ``"NED"``.
     :type mopad_basis: str
     :param axes: figure axis for beach ball, this is used to ensure the aspect ratio is
-        adjusted so that the beach ball is circular on non-scaled axes.
+        adjusted so that the beach ball is circular on non-scaled axes. When this option is used
+        figure cannot be saved in vector format.
         Default is ``None``.
     :type axes: :class:`~matplotlib.axes.Axes`
     :param show_iso: flag to display the isotropic component, default is ``False``.
@@ -211,7 +212,7 @@ def beach(fm, linewidth=1, facecolor='0.75', bgcolor='w', edgecolor='k',
     # based on mopads _setup_plot_US() function
     # collect patches for the selection
     coll = [None, None, None]
-    coll[0] = patches.Circle(xy, radius=radius)
+    coll[0] = mpl.patches.Circle(xy, radius=radius)
     coll[1] = xy2patch(neg_nodalline[0, :], neg_nodalline[1, :], radius, xy)
     coll[2] = xy2patch(pos_nodalline[0, :], pos_nodalline[1, :], radius, xy)
 
@@ -255,19 +256,18 @@ def beach(fm, linewidth=1, facecolor='0.75', bgcolor='w', edgecolor='k',
 
     # transform the patches to a path collection and set
     # the appropriate attributes
-    collection = mpl_collections.PatchCollection(coll, match_original=False)
+    collection = mpl.collections.PatchCollection(coll, match_original=False)
     collection.set_facecolors(fc)
     # Use the given axes to maintain the aspect ratio of beac hballs on figure
     # resize.
     if axes is not None:
-        # This is what holds the aspect ratio (but breaks the positioning)
-        collection.set_transform(transforms.IdentityTransform()) # Need to find another way to print as vector graphics
-        # Next is a dirty hack to fix the positioning:
-        # 1. Need to bring the all patches to the origin (0, 0).
+        # This is what holds the aspect ratio (but breaks the positioning), and
+        # the part that fails in vector file format
+        collection.set_transform(mpl.transforms.IdentityTransform())
+        # Bring the all patches to the origin (0, 0).
         for p in collection._paths:
             p.vertices -= xy
-        # 2. Then use the offset property of the collection to position the
-        # patches
+        # Use the offset property of the collection to position the patches
         collection.set_offsets(xy)
         collection._transOffset = axes.transData
     collection.set_edgecolors(edgecolor)
@@ -278,7 +278,7 @@ def beach(fm, linewidth=1, facecolor='0.75', bgcolor='w', edgecolor='k',
     return collection
 
 
-def beach_map(m,event,stlo,stla,distance,show,format,zoom_level=8):
+def beach_map(m, event, longitude, latitude, distance, used, show, format):
     """
     Plot beach ball on a map
 
@@ -290,18 +290,19 @@ def beach_map(m,event,stlo,stla,distance,show,format,zoom_level=8):
     :param event: event origin time, longitude and latitude, refer to :class:`~tdmtpy.configure.Configure`
         for details.
     :type event: dict
-    :param stlo: station longitudes
-    :type stlo: list or :class:`~numpy.ndarray`
-    :param stla: station latitudes.
-    :type stla: list or :class:`~numpy.ndarray`
+    :param longitude: station longitudes.
+    :type longitude: list or :class:`~numpy.ndarray`
+    :param latitude: station latitudes.
+    :type latitude: list or :class:`~numpy.ndarray`
     :param distance: source-receiver distance.
     :type distance: list or :class:`~numpy.ndarray`
+    :param used: inverted stations. Sets the station marker colors,
+        ``True`` for green and ``False`` for gray.
+    :type used: list or :class:`~numpy.ndarray`
     :param show: Turn on interactive display.
     :type show: bool
     :param format: figure file format.
     :type format: str
-    :param zoom_level: background image tile zoom level. Default is ``8``.
-    :type zoom_level: int
     """
     # Turn interactive plotting off
     plt.ioff()  # only display plots when called, save figure without displaying in ipython
@@ -310,48 +311,58 @@ def beach_map(m,event,stlo,stla,distance,show,format,zoom_level=8):
     width = kilometers2degrees(0.5 * max(distance))
     height = kilometers2degrees(0.5 * max(distance))
 
-    lat1 = min(stla) - height
-    lat2 = max(stla) + height
-    lon1 = min(stlo) - width
-    lon2 = max(stlo) + width
+    lat1 = min(latitude) - height
+    lat2 = max(latitude) + height
+    lon1 = min(longitude) - width
+    lon2 = max(longitude) + width
 
     data_crs = ccrs.PlateCarree()
     evlo = event["longitude"]
     evla = event["latitude"]
     point = (evlo,evla)
 
-    stamen_terrain = cimgt.Stamen('terrain-background')
-    projection = stamen_terrain.crs
+    projection = ccrs.PlateCarree()
 
-    fig = plt.figure(dpi=dpi)
-    fig.set_size_inches(8.5,11)
-    if format != "png":
-        ax = fig.add_subplot(1, 1, 1, projection=projection,rasterized=True)  # axes coordinates
-    else:
-        ax = fig.add_subplot(1, 1, 1, projection=projection)  # axes coordinates
+    fig = plt.figure(figsize=(95*mm, 115*mm))
+    ax = fig.add_subplot(1, 1, 1, projection=projection)
     ax.set_extent([lon1, lon2, lat1, lat2])
-    ax.add_image(stamen_terrain, zoom_level)
+
+    # Add borders and coastline
+    ax.add_feature(cfeature.LAND)
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS)
 
     # Add tick labels
-    g1 = ax.gridlines(crs=data_crs,draw_labels=True)
-    g1.top_labels = False
+    gl = ax.gridlines(crs=data_crs, draw_labels=True, linewidth=LINEWIDTH)
+    gl.top_labels = False
+    #gl.xlabel_style = {"size": smaller}
+    #gl.ylabel_style = {"size": SMALL_SIZE}
 
     # Plot stations
-    ax.plot(stlo,stla,marker="^", color="black", markersize=8, linestyle="", transform=data_crs)
+    colors = [ "green" if i else "0.5" for i in used]
+    for i in range(len(colors)):
+        ax.plot(
+            longitude[i],
+            latitude[i],
+            marker="^",
+            color=colors[i],
+            markeredgecolor="black",
+            transform=data_crs
+        )
 
     # Plot beach ball on map
     x, y = projection.transform_point(*point, src_crs=data_crs)
-    bb = beach(m,xy=(x,y),facecolor="red",width=135,show_iso=True,axes=ax)
+    bb = beach(m, xy=(x, y), facecolor="red", width=0.25, show_iso=True)
     ax.add_collection(bb)
 
     # Add title
     ax.set_title(event["datetime"])
 
-    outfile = "map.%s"%format
-    fig.savefig(outfile,format=format,bbox_inches="tight")
     if show:
         plt.show()
     else:
+        outfile = "map.%s" % format
+        fig.savefig(outfile, format=format, transparent=True)
         plt.close(fig)
 
 
@@ -373,19 +384,19 @@ def plot_lune(gamma,delta,show,format):
     :type format: str
     """
     # Turn interactive plotting off
-    plt.ioff()  # only display plots when called, save figure without displaying in ipython
+    #plt.ioff()  # only display plots when called, save figure without displaying in ipython
 
-    fig = plt.figure(figsize=[6,10])
+    fig = plt.figure(figsize=(95*mm, 115*mm))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.LambertAzimuthalEqualArea())
 
     # Draw boundary around the lune
     longitude = np.concatenate([[-30], np.tile(-30, 180), [-30], np.tile(30, 180), [30]])
     latitude = np.concatenate([[-90], np.arange(-90, 90, 1), [90], np.arange(90, -90, -1), [-90]])
-    codes = np.hstack([mpath.Path.MOVETO, [mpath.Path.LINETO] * 180,
-                       mpath.Path.MOVETO, [mpath.Path.LINETO] * 180,
-                       mpath.Path.MOVETO])
+    codes = np.hstack([mpl.path.Path.MOVETO, [mpl.path.Path.LINETO] * 180,
+                       mpl.path.Path.MOVETO, [mpl.path.Path.LINETO] * 180,
+                       mpl.path.Path.MOVETO])
     verts = np.column_stack([longitude[::-1], latitude[::-1]])
-    path = mpath.Path(verts, codes[::-1])
+    path = mpl.path.Path(verts, codes[::-1])
     ax.set_boundary(path, transform=ccrs.PlateCarree())
     ax.set_extent([-30, 30, -90, 90], ccrs.PlateCarree())
 
@@ -394,13 +405,13 @@ def plot_lune(gamma,delta,show,format):
     ylocs = np.arange(-90, 90 + 10, 10, dtype=np.int)
     ax.gridlines(xlocs=xlocs, ylocs=ylocs)
 
-    # Offset text by pixels
+    # Offset text by mm
     text_transform = ccrs.PlateCarree()._as_mpl_transform(ax)
-    pixels = 10
-    left = transforms.offset_copy(text_transform, units="dots", x=-1 * pixels)
-    right = transforms.offset_copy(text_transform, units="dots", x=pixels)
-    top = transforms.offset_copy(text_transform, units="dots", y=pixels)
-    bottom = transforms.offset_copy(text_transform, units="dots", y=-1 * pixels)
+    inches = 1.5
+    left = mpl.transforms.offset_copy(text_transform, fig, units="inches", x=-1*inches*mm)
+    right = mpl.transforms.offset_copy(text_transform, fig, units="inches", x=inches*mm)
+    top = mpl.transforms.offset_copy(text_transform, fig, units="inches", y=inches*mm)
+    bottom = mpl.transforms.offset_copy(text_transform, fig, units="inches", y=-1*inches*mm)
 
     # Theoretical sources
     x = [0, -30, -30, 0, 30, 30, -30, 30, 0]
@@ -410,11 +421,10 @@ def plot_lune(gamma,delta,show,format):
 
     halign = ["center", "right", "right", "center", "left", "left", "right", "left", "center"]
     valign = ["top", "center", "center", "bottom", "center", "center", "center", "center", "top"]
-    ax.plot(x, y, "o", color="black", markersize=8, transform=ccrs.PlateCarree(), clip_on=False)
+    ax.plot(x, y, "o", color="black", transform=ccrs.PlateCarree(), clip_on=False)
     for i in range(len(x)):
         ax.text(x[i], y[i], sources[i],
                 transform=offset[i], clip_on=False,
-                #fontsize=14,
                 verticalalignment=valign[i], horizontalalignment=halign[i])
 
     # Source type arc
@@ -451,17 +461,17 @@ def plot_lune(gamma,delta,show,format):
     ax.plot(x, y, "k-", transform=ccrs.PlateCarree())
 
     # Plot source-type
-    ax.plot(gamma,delta,"ro",markersize=10,markeredgecolor="k",transform=ccrs.PlateCarree())
+    ax.plot(gamma, delta, "ro", markeredgecolor="k", transform=ccrs.PlateCarree())
 
-    outfile = "lune.%s"%format
-    fig.savefig(outfile,format=format,bbox_inches="tight")
     if show:
         plt.show()
     else:
+        outfile = "lune.%s"%format
+        fig.savefig(outfile, format=format, transparent=True)
         plt.close(fig)
 
 
-def beach_mw_depth(tensors,depth,event,show,format,figsize=(3.54,3.00)):
+def beach_mw_depth(tensors, depth, event, show, format):
     """
     Plot depth search result
 
@@ -477,29 +487,21 @@ def beach_mw_depth(tensors,depth,event,show,format,figsize=(3.54,3.00)):
     :type event: dict
     :param show: Turn on interactive display.
     :type show: bool
-    :param format: figure file format.
-    :type format: str
     """
     # Can only be saved as a raster image due to the beach ball display
     # need to find another way to fix the beach ball aspect ratios without using
     # display coordinates
 
     # Turn interactive plotting off
-    plt.ioff()  # only display plots when called, save figure without displaying in ipython
+    #plt.ioff()  # only display plots when called, save figure without displaying in ipython
+    fig = plt.figure(figsize=(115*mm, 95*mm))
+    ax1 = fig.add_subplot(1, 1, 1)
 
-    fig = plt.figure(figsize=figsize,dpi=dpi)
-    #fig.set_size_inches(11,8.5)
-    #if format != "png":
-    #    ax1 = fig.add_subplot(1, 1, 1, rasterized=True)
-    #else:
-    #    ax1 = fig.add_subplot(1, 1, 1,)
-
-    ax1 = fig.add_subplot(1, 1, 1, )
     # Axis 1 - variance reduction
     color1 = "red"
     ax1.set_xlabel("Depth [km]")
     ax1.set_ylabel("VR [%]", color=color1)
-    ax1.set_ylim([0, 120])
+    ax1.set_ylim(0, 120)
     ax1.set_yticks([0, 20, 40, 60, 80, 100])
     ax1.set_yticklabels([0, 20, 40, 60, 80, 100])
     title = "%s | %5.2f %5.2f"%(event["datetime"],event["longitude"],event["latitude"])
@@ -509,36 +511,36 @@ def beach_mw_depth(tensors,depth,event,show,format,figsize=(3.54,3.00)):
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     ax2.set_ylabel("Mw", color=color2)
     source_depth = [tensor.inverted.depth for tensor in tensors]
-    white_space = (max(source_depth)-min(source_depth))/6
-    if white_space == 0:
-        white_space = 1.0
-    ax2.set_xlim([min(source_depth)-white_space, max(source_depth)+white_space])
-    ax2.set_ylim([0, 12])
+    margin = (max(source_depth)-min(source_depth))/6
+    #if margin == 0:
+    #    margin = 1.0
+    ax2.set_xlim([min(source_depth)-margin, max(source_depth)+margin])
+    ax2.set_ylim(0,12)
     ax2.set_yticks([0, 2, 4, 6, 8, 10])
     ax2.set_yticklabels([0, 2, 4, 6, 8, 10])
 
     for tensor in tensors:
         ax1.vlines(depth, 0, 100, color="black")
-        ax1.plot(tensor.inverted.depth,tensor.inverted.total_VR,"o",
-                 markersize=4, color=color1)
+        ax1.plot(tensor.inverted.depth,tensor.inverted.total_VR,"o", color=color1)
         bb = beach(tensor.m,
-                   xy=(tensor.inverted.depth,tensor.inverted.total_VR+10),
+                   xy=(0,0),
                    facecolor=color1,
-                   width=45,
+                   width=0.25,
                    show_iso=True,
-                   axes=ax1,
                   )
+        # Move the beach ball to the right position
+        bb.set_transform(fig.dpi_scale_trans)
+        bb.set_offsets((tensor.inverted.depth,tensor.inverted.total_VR+10))
+        bb._transOffset = ax1.transData
         ax1.add_collection(bb)
         ax1.tick_params(axis="y", labelcolor=color1)
 
-        ax2.plot(tensor.inverted.depth, tensor.mw, "o",
-                 markersize=4, color=color2)
+        ax2.plot(tensor.inverted.depth, tensor.mw, "o", color=color2)
         ax2.tick_params(axis="y", labelcolor=color2)
 
-    fig.tight_layout() # otherwise the right y-label is slightly clipped
-    outfile = "depth.bbmw.%s"%format
-    fig.savefig(outfile,format=format,bbox_inches="tight")
     if show:
         plt.show()
     else:
+        outfile = "depth.bbmw.%s" % format
+        fig.savefig(outfile, format=format, transparent=True)
         plt.close(fig)
