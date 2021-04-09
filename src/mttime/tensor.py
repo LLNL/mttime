@@ -6,11 +6,7 @@
 Routines for handling inversion results
 """
 
-from copy import deepcopy
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from .image import new_page, beach
 
 
 def get_m_in_basis(m, in_basis, out_basis):
