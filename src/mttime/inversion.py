@@ -546,34 +546,39 @@ class Inversion(object):
         format = kwargs.get("format","eps")
         if view == "normal":
             option = kwargs.get("option", None)
+            from .imaging.source import plot_waveform_fits
             if option == "preferred":
-                self.get_preferred_tensor()._beach_waveforms_3c(show, format)
+                tensors = [self.get_preferred_tensor()]
             else:
-                for tensor in self.moment_tensors:
-                    tensor._beach_waveforms_3c(show, format)
+                tensors = self.moment_tensors
+            for tensor in tensors:
+                plot_waveform_fits(tensor, show, format)
         elif view == "map":
             if self.config.event is None:
                 print("Event origin is missing, cannot plot in map view.")
             else:
-                from .image import beach_map
+                from .imaging.source import beach_map
                 m = self.get_preferred_tensor().m
 
-                args = (self.config.event,
-                        self.config.station_table.longitude.values,
-                        self.config.station_table.latitude.values,
-                        self.config.station_table.distance.values,
-                        self.config.station_table[self.config.components].sum(axis=1).astype(bool).values,
-                        show,
-                        format,
-                       )
-                beach_map(m,*args)
+                args = (
+                    self.config.event,
+                    self.config.station_table.longitude.values,
+                    self.config.station_table.latitude.values,
+                    self.config.station_table.distance.values,
+                    self.config.station_table[self.config.components].sum(axis=1).astype(bool).values,
+                    show,
+                    format,
+                )
+                beach_map(m, *args)
         elif view == "depth":
-            from .image import beach_mw_depth
+            from .imaging.source import beach_mw_depth
             beach_mw_depth(self.moment_tensors, self.config.event, show, format)
         elif view == "lune":
-            from .image import plot_lune
-            gamma,delta = self.get_preferred_tensor().lune
+            from .imaging.source import plot_lune
+            gamma, delta = self.get_preferred_tensor().lune
             plot_lune(gamma, delta, show, format)
+        else:
+            raise KeyError("'view=%s' is not supported."%view)
 
     def _cleanup(self):
         del self.d
