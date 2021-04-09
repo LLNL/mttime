@@ -3,15 +3,15 @@
 # LLNL-CODE-814839
 # author: Andrea Chiang (andrea@llnl.gov)
 """
-Set global tdmtpy configuration
+Set global mttime configuration
 
 .. rubric:: Example
 
 .. code-block:: python
 
-   >>> import tdmtpy
+   >>> import mttime
    >>> # read input file mtinv.in
-   >>> config = tdmtpy.Configure(path_to_file="mtinv.in")
+   >>> config = mttime.Configure(path_to_file="mtinv.in")
 
 """
 
@@ -24,44 +24,46 @@ import pandas as pd
 
 class Configure(object):
     """
-    Configure object for :class:`~tdmtpy.inversion.Inversion`
+    Configure object for :class:`~mttime.inversion.Inversion`
 
     Sets up the moment tensor inverse routine. ``**kwargs`` can be provided
-    either in ``path_to_file`` or during class instantiation.
+    either in ``path_to_file`` or during class instantiation. ``df`` and ``depth``
+    are required if not reading from a file.
     ``**kwargs`` will override the values in ``path_to_file`` and any missing
     keyword arguments will be set to their default values.
 
     :param path_to_file: path to input file containing headers and station information.
-        Directory will become the project root directory. Default is ``"./mtinv.in"``.
+        Input file should be located in the project root directory.
     :type path_to_file: str
+    :param df: station table, required if ``path_to_file=None``.
+    :type: :class:`~pandas.core.frame.DataFrame`
     :param datetime: event origin time.
     :type datetime: str, optional
     :param longitude: event longitude.
     :type longitude: float, optional
     :param latitude: event latitude.
     :type latitude: float, optional
-    :param depth: source depths to invert.
+    :param depth: source depths to invert, required if ``path_to_file=None``
     :type depth: float, int, list of floats/ints
     :param path_to_data: path to data files, relative to root directory.
-        Defaults is ``"./"``.
+        Defaults is ``"."``.
     :type path_to_data: str
     :param path_to_green: path to Green's function files, relative to root directory.
-        Defaults is ``"./"``.
+        Default is ``"."``.
     :type path_to_green: str
     :param green: Green's function format, options are ``"herrmann"`` or ``"tensor"``.
-        Defaults to ``"herrmann"``.
+        Default is ``"herrmann"``.
     :type green: str
     :param components: waveform components, options are ``"Z"`` for vertical component,
         or ``"ZRT"`` for three-component data in vertical, radial and transverse components, and
-        ``"ZNE"`` for vertica, north and east.
-        Defaults to ``"ZRT"``.
+        ``"ZNE"`` for vertical, north and east. Default is ``"ZRT"``.
     :type components: list of str
-    :param degree: degrees of freedom allowed in the inversion, options are ``5`` for deviatoric
-        or ``6`` for full. Defaults to ``5``.
+    :param degree: degrees of freedom allowed in the inversion, options are
+        ``5`` for deviatoric or ``6`` for full. Default is ``5``.
     :type degree: int
     :param weight: data weights, options are ``"none"``, ``"distance"`` or ``"variance"``
         for no weights, inverse distance, or inverse variance, respectively.
-        Defaults to ``"none"``.
+        Default is ``"none"``.
     :type weight: str
     :param plot: If ``True`` will plot the solution and waveform fits. Default is ``False``.
     :type plot: int, bool
@@ -132,7 +134,7 @@ class Configure(object):
         :type path_to_file: str
         :param types: keyword arguments
         :type types: dict
-        :return: a dictionary of parameters for a single :class:`~tdmtpy.configure.Configure` object
+        :return: a dictionary of parameters for a single :class:`~mttime.configure.Configure` object
         :rtype: dict
         """
 
