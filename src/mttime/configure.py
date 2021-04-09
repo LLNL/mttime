@@ -28,8 +28,8 @@ class Configure(object):
 
     Sets up the moment tensor inverse routine. ``**kwargs`` can be provided
     either in ``path_to_file`` or during class instantiation.
-    Any ``**kwargs`` provided during class instantiation will override the values
-    from file, and if any values are left blank in the file the default value will be used instead.
+    ``**kwargs`` will override the values in ``path_to_file`` and any missing
+    keyword arguments will be set to their default values.
 
     :param path_to_file: path to input file containing headers and station information.
         Directory will become the project root directory. Default is ``"./mtinv.in"``.
@@ -69,65 +69,57 @@ class Configure(object):
         for best time shift (in time points). Default is ``False``.
     :type correlate: int, bool
     """
-    def __init__(self, path_to_file="mtinv.in", **kwargs):
-        # dict types
-        types = dict(datetime=str,
-                     longitude=float,
-                     latitude=float,
-                     depth=str,  # comma-delimited
-                     path_to_data=str,
-                     path_to_green=str,
-                     green=str,
-                     components=str,
-                     degree=int,
-                     weight=str,
-                     plot=int,
-                     correlate=int
-                    )
-        # Station table dtypes
-        df_dtypes = {"station": str,
-                     "distance": np.float,
-                     "azimuth": np.float,
-                     "ts": np.int,
-                     "npts": np.int,
-                     "dt": np.float,
-                     "used": str,
-                     "longitude": np.float,
-                     "latitude": np.float,
-                     "filter": str, # optional
-                     "nc": np.int,
-                     "np": np.int,
-                     "lcrn": np.float,
-                     "hcrn": np.float,
-                     "model": str
-                    }
+    # keyword argument types
+    _types = {"datetime": str,
+              "longitude": float,
+              "latitude": float,
+              "depth": str, # if read from file
+              "path_to_data": str,
+              "path_to_green": str,
+              "green": str,
+              "components": str,
+              "degree": int,
+              "weight": str,
+              "plot": int,
+              "correlate": int
+              }
+    # station table dtypes
+    _df_dtypes = {"station": str,
+                 "distance": np.float,
+                 "azimuth": np.float,
+                 "ts": np.int,
+                 "npts": np.int,
+                 "dt": np.float,
+                 "used": str,
+                 "longitude": np.float,
+                 "latitude": np.float,
+                 "filter": str,  # optional
+                 "nc": np.int,
+                 "np": np.int,
+                 "lcrn": np.float,
+                 "hcrn": np.float,
+                 "model": str
+                 }
 
-        self.__dict__["types"] = types
-        self.__dict__["df_dtypes"] = df_dtypes
-
+    def __init__(self, path_to_file=None, df=None, **kwargs):
         # Read keywords from file first
-        header, home = self._read(path_to_file, types)
+        if path_to_file is None:
+            header = {}
+            if df is None:
+                raise ValueError("'df' value is missing.")
+            if kwargs.get("depth") is None:
+                raise ValueError("'depth' value is missing.")
+            file = df
+        else:
+            header = self._read(path_to_file, self._types)
+            file = path_to_file
 
         # Override parameters from file if provided kwargs during class instantiation
         # then set class attributes
-        self._set_attributes(home, header, **kwargs)
+        self._set_attributes(header, **kwargs)
 
         # Read station table
-        self._update_table_index(path_to_file, df_dtypes)
-
-    @property
-    def types(self):
-        """
-        dict of types for ``**kwargs``, read only
-        """
-        return self.__dict__["types"]
-
-    @property
-    def df_dtypes(self):
-        """
-        dict of dtypes for station table, read only
-        """
-        return self.__dict__["df_dtypes"]
+        self._update_table_index(file)
 
     @staticmethod
     def _read(path_to_file, types):
@@ -154,9 +146,8 @@ class Configure(object):
         except IOError:
             print("Cannot open '%s'" % path_to_file)
 
-        header = dict()
-
         # Read keyword arguments from file
+        header = {}
         with open(path_to_file, "r") as f:
             for key, parse in types.items():
                 try:
@@ -175,7 +166,15 @@ class Configure(object):
         else:
             home = "."
 
-        return header, home
+        header["path_to_data"] = os.path.abspath(
+            "/".join([home, header["path_to_data"]])
+        )
+
+        header["path_to_green"] = os.path.abspath(
+            "/".join([home, header["path_to_green"]])
+        )
+
+        return header
 
     def write(self, fileout="config.out"):
         """
@@ -195,23 +194,19 @@ class Configure(object):
         with open(fileout, "w") as f:
             f.write(self.__str__())
 
-    def _set_attributes(self, home, header, **kwargs):
+    def _set_attributes(self, header, **kwargs):
         """
         Set class attributes
 
-        :param home: root directory
-        :type home: str
         :param header: a dictionary of parameters
         :type header: dict
         :param kwargs: inputs from console
         ;type kwargs: dict
         """
         # Over-ride parameters and set type
-        for key, parse in self.types.items():
+        for key, parse in self._types.items():
             if key in kwargs:
-                if key == "depth":
-                    pass
-                else:
+                if key != "depth":
                     kwargs[key] = parse(kwargs[key])
             else:
                 try:
@@ -229,10 +224,8 @@ class Configure(object):
         # Required attributes
         self.depth = []
         self._set_depth(kwargs["depth"])
-        self.path_to_data = os.path.abspath(
-            "/".join([home, kwargs.get("path_to_data", ".")]))
-        self.path_to_green = os.path.abspath(
-            "/".join([home, kwargs.get("path_to_green", ".")]))
+        self.path_to_data = os.path.abspath(kwargs.get("path_to_data", "."))
+        self.path_to_green =  os.path.abspath(kwargs.get("path_to_green", "."))
         kwargs["green"] = kwargs.get("green", "herrmann")
         if kwargs["green"].lower() not in ("herrmann", "tensor"):
             raise ValueError("green not supported.")
@@ -277,18 +270,23 @@ class Configure(object):
             msg = "Depth must be a number or a list of numbers."
             raise TypeError(msg)
 
-    def _update_table_index(self, path_to_file, df_dtypes):
+    def _update_table_index(self, file):
         """
         Constructs the station table from input file
 
-        :param path_to_file: path to input file containing headers and station information.
-        :type path_to_file: str
-        :param df_dtypes: dtypes for station table
-        :type df_dtypes: dict
+        :param file: path to input file or pandas DataFrame object
+            containing headers and station information
+        :type file: str or :class:`~pandas.core.frame.DataFrame`
         """
 
         # Read station table
-        df = pd.read_table(path_to_file, sep=r"\s+", dtype=df_dtypes, skiprows=12)
+        if isinstance(file, str):
+            df = pd.read_table(file, sep=r"\s+", dtype=self._df_dtypes, skiprows=12)
+        elif isinstance(file, pd.DataFrame):
+            df = file
+        else:
+            msg = "'file' is not supported."
+            raise TypeError(msg)
 
         self.nsta = len(df.index)
         self.ncomp = len(self.components)
