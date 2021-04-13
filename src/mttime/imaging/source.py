@@ -11,6 +11,7 @@ Plotting routines for mttime
    :meth:`~mttime.inversion.Inversion.plot`.
 """
 
+import os
 import warnings
 import numpy as np
 
@@ -19,6 +20,9 @@ from matplotlib import transforms
 from matplotlib.path import Path as mpath
 from obspy.geodetics.base import kilometers2degrees
 from .beachball import beach
+import matplotlib.pyplot as plt
+from mttime.imaging import MTTIME_MPLSTYLE
+plt.style.use(MTTIME_MPLSTYLE)
 
 from mttime.utils import CARTOPY_VERSION
 if CARTOPY_VERSION and CARTOPY_VERSION >= [0, 17, 0]:
@@ -35,39 +39,6 @@ if not HAS_CARTOPY:
 
 # Figure defaults
 mm = 1/25.4 # mm in inches
-#ppi = 72 # 72 pts per inch
-#dpi = 300
-#LINEWIDTH = 2.5/(dpi/ppi)
-
-
-def _adjust_spines(ax, spines):
-    """
-    Adjust axis spine for the standard beach ball/waveform plot
-
-    Function to customize figure axes.
-
-    :param ax: the axes instance containing the spine.
-    :type ax: :class:`~matplotlib.axes.Axes`
-    :param spines: spine type.
-    :type spines: list(str)
-    """
-    ax.tick_params(direction='in')
-    for loc, spine in ax.spines.items():
-        if loc in spines:
-            spine.set_position(('outward',5)) # outward by 5 points
-        else:
-            spine.set_color('none') # don't draw spine
-
-    # turn off ticks where there is no spine
-    if 'left' in spines:
-        ax.yaxis.set_ticks_position('left')
-    else:
-        ax.yaxis.set_ticks([])
-
-    if 'bottom' in spines:
-        ax.xaxis.set_ticks_position('bottom')
-    else:
-        ax.xaxis.set_ticks([])
 
 
 def new_page(nsta, nrows, ncols, title, annot=None, offset=2):
@@ -93,7 +64,6 @@ def new_page(nsta, nrows, ncols, title, annot=None, offset=2):
     :return: figure container, axis of the focal mechanism plot, and axes for the waveform traces.
     :rtype: class:`~matplotlib.figure.Figure`, :class:`~matplotlib.axes.Axes`, list
     """
-    import matplotlib.pyplot as plt
 
     if annot is None:
         annot = ""
@@ -101,12 +71,12 @@ def new_page(nsta, nrows, ncols, title, annot=None, offset=2):
     if nsta > nrows:
         raise ValueError("Maximum number of stations per page is %d."%nrows)
 
-    gs = GridSpec(nrows+offset, ncols, hspace=0.6, wspace=0.15)
+    gs = GridSpec(nrows+offset, ncols, hspace=0.7, wspace=0.15)
     f = plt.figure(figsize=(190*mm, 230*mm))
     
     # Annotations and beach balls
     ax0 = f.add_subplot(gs[0:offset,:], xlim=(-5,3.55), ylim=(-0.75,0.6), aspect="equal")
-    ax0.text(-5, 0, annot, verticalalignment='center')
+    ax0.text(-5, 0, annot, verticalalignment="center")
     ax0.set_axis_off()
 
     # Waveforms
@@ -118,16 +88,16 @@ def new_page(nsta, nrows, ncols, title, annot=None, offset=2):
 
     # Adjust axes
     for i in range(nsta-1):
-        _adjust_spines(ax1[i,0],['left'])
+        _adjust_spines(ax1[i,0],["left"])
         _adjust_spines(ax1[i,1], [])
         _adjust_spines(ax1[i,2], ["bottom"])
-    _adjust_spines(ax1[-1,0],['left',"bottom"])
-    _adjust_spines(ax1[-1,1],['bottom'])
-    _adjust_spines(ax1[-1,2],['bottom'])
+    _adjust_spines(ax1[-1,0],["left","bottom"])
+    _adjust_spines(ax1[-1,1],["bottom"])
+    _adjust_spines(ax1[-1,2],["bottom"])
     
     # Title
     for i in range(ncols):
-        ax1[0,i].set_title(title[i], verticalalignment='bottom', pad=15)
+        ax1[0,i].set_title(title[i], verticalalignment="bottom", pad=15)
     
     return (f, ax0, ax1)
 
@@ -140,11 +110,6 @@ def plot_waveform_fits(tensor, show, format, nrows=10):
     :param nrows: maximum stations per page. Default is 10.
     :type nrows: int
     """
-    import matplotlib.pyplot as plt
-
-    # Number decimals to print
-    dist = ("{0:.0f}")
-
     # Set page layout
     nsta = len(tensor.station_table.index)
     ncols = len(tensor.components)
@@ -191,7 +156,7 @@ def plot_waveform_fits(tensor, show, format, nrows=10):
         ax0.text(fm_sign[1], 0, '+', horizontalalignment='center', verticalalignment='center')
         # Plot stations around beach ball
         for xi,yi,azi,col in zip(x, y, tensor.station_table.azimuth, tri_color):
-            ax0.plot(xi, yi, marker=(3, 0, -1*azi), color=col, zorder=101, markersize=5)
+            ax0.plot(xi, yi, marker=(3, 0, -1*azi), color=col, zorder=101)
         # Plot waveforms
         for i, stat in enumerate(group):
             t = np.arange(
@@ -210,24 +175,26 @@ def plot_waveform_fits(tensor, show, format, nrows=10):
                 ax1[i, j].set_xlim(0, t[-1])
             # Set ticks and labels
             ax1[i, 0].set_yticks([ymin, 0, ymax])
-            ax1[i, 0].set_yticklabels(['%.2e' % ymin, '0', '%.2e' % ymax])
+            ax1[i, 0].set_yticklabels(["%.2e"% ymin, "0", "%.2e"%ymax])
             # Station name, distance and azimuth
+            dist = ("{0:.0f}")
             dist = dist.format(tensor.station_table.distance[stat])
-            label = '\n'.join(
+            label = '  '.join(
                 [tensor.station_table.station[stat],
-                 r'$\Delta,\theta$=%s,%-.0f' % (dist, tensor.station_table.azimuth[stat])]
+                 r"$\Delta,\theta$=%s,%-.0f"%(dist, tensor.station_table.azimuth[stat])]
             )
-            ax1[i, 0].text(0,ymax, label, verticalalignment="bottom")
+            ax1[i, 0].text(0, ymax, label, verticalalignment="bottom")
             # Sample shift and VR
-            ax1[i, 1].text(
-                t[-1], ymax,
-                'ts,VR=%d,%.0f'%(tensor.station_table.ts[stat], tensor.station_table.VR[stat]),
-                horizontalalignment="right",
-                verticalalignment="bottom"
+            label = "TS,VR=%d,%.0f"%(
+                tensor.station_table.ts[stat],
+                tensor.station_table.VR[stat]
             )
+            ax1[i, 1].text(t[-1], ymax, label,
+                           horizontalalignment="right",
+                           verticalalignment="bottom")
         # Label last row only
         for column in range(3):
-            ax1[i, column].set_xlabel('Time [s]')
+            ax1[i, column].set_xlabel("Time [s]")
 
         if show:
             plt.show()
@@ -263,8 +230,6 @@ def beach_map(m, event, longitude, latitude, distance, used, show, format):
     :param format: figure file format.
     :type format: str
     """
-    import matplotlib.pyplot as plt
-
     # Calculate image extent based on epicentral distance
     width = kilometers2degrees(0.5 * max(distance))
     height = kilometers2degrees(0.5 * max(distance))
@@ -341,8 +306,6 @@ def plot_lune(gamma,delta,show,format):
     :param format: figure file format.
     :type format: str
     """
-    import matplotlib.pyplot as plt
-
     fig = plt.figure(figsize=(95*mm, 115*mm))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.LambertAzimuthalEqualArea())
 
@@ -378,7 +341,7 @@ def plot_lune(gamma,delta,show,format):
 
     halign = ["center", "right", "right", "center", "left", "left", "right", "left", "center"]
     valign = ["top", "center", "center", "bottom", "center", "center", "center", "center", "top"]
-    ax.plot(x, y, "o", color="black", transform=ccrs.PlateCarree(), clip_on=False)
+    ax.plot(x, y, "o", color="black", transform=ccrs.PlateCarree(), clip_on=False, markersize=6)
     for i in range(len(x)):
         ax.text(x[i], y[i], sources[i],
                 transform=offset[i], clip_on=False,
@@ -443,8 +406,6 @@ def beach_mw_depth(tensors, event, show, format):
     :param show: Turn on interactive display.
     :type show: bool
     """
-    import matplotlib.pyplot as plt
-
     fig = plt.figure(figsize=(115*mm, 95*mm))
     ax1 = fig.add_subplot(1, 1, 1)
 
@@ -497,3 +458,33 @@ def beach_mw_depth(tensors, event, show, format):
         outfile = "depth.bbmw.%s" % format
         fig.savefig(outfile, format=format, transparent=True)
         plt.close(fig)
+
+
+def _adjust_spines(ax, spines):
+    """
+    Adjust axis spine for the standard beach ball/waveform plot
+
+    Function to customize figure axes.
+
+    :param ax: the axes instance containing the spine.
+    :type ax: :class:`~matplotlib.axes.Axes`
+    :param spines: spine type.
+    :type spines: list(str)
+    """
+    ax.tick_params(direction='in')
+    for loc, spine in ax.spines.items():
+        if loc in spines:
+            spine.set_position(('outward',5)) # outward by 5 points
+        else:
+            spine.set_color('none') # don't draw spine
+
+    # turn off ticks where there is no spine
+    if 'left' in spines:
+        ax.yaxis.set_ticks_position('left')
+    else:
+        ax.yaxis.set_ticks([])
+
+    if 'bottom' in spines:
+        ax.xaxis.set_ticks_position('bottom')
+    else:
+        ax.xaxis.set_ticks([])
