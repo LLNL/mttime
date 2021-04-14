@@ -22,7 +22,7 @@ class Inversion(object):
     solutions.
 
     :param config: object containing the necessary parameters for setting up the inverse routine
-    :type config: :py:class:`~mttime.configure.Configure`
+    :type config: :class:`~mttime.configure.Configure`
 
     :var streams: processed waveform data.
     :vartype streams: a list of :class:`~obspy.core.stream.Stream`
@@ -503,8 +503,8 @@ class Inversion(object):
         """
         Write inversion results to file
 
-        Save all or only the preferred solution to file, the default is set to ``None``
-        which saves all solutions. The output file name format is ``d[depth].mtinv.out``.
+        Save all solutions or only the preferred solution to file.
+        The output file name format is ``d[depth].mtinv.out``.
 
         :param option: option to write all solutions or only the preferred solution. Default is
             ``None``. If set to ``preferred`` only the solution with the highest VR will be saved.
@@ -526,9 +526,10 @@ class Inversion(object):
 
         Various options available to display the results.
 
-        :param view: type of figure to produce. Default ``normal`` creates the standard figure with focal mechanisms
-            and waveform fits. ``depth`` shows the focal mechanism and moment magnitude as a
-            function of depth. ``map`` plots stations and focal mechanisms on a terrain background.
+        :param view: type of figure to produce. Default ``normal`` creates the
+            standard figure with focal mechanisms and waveform fits.
+            ``depth`` shows the focal mechanism and moment magnitude as a
+            function of depth. ``map`` plots stations and focal mechanisms in map view.
             ``lune`` plots the moment tensor source-type on a lune.
         :type view: str
         :param show: If ``True`` will display figure after plotting and not save image to file,
@@ -575,8 +576,10 @@ class Inversion(object):
             beach_mw_depth(self.moment_tensors, self.config.event, show, format)
         elif view == "lune":
             from .imaging.source import plot_lune
-            gamma, delta = self.get_preferred_tensor().lune
-            plot_lune(gamma, delta, show, format)
+            mt = self.get_preferred_tensor()
+            m = mt.m
+            gamma, delta = mt.lune
+            plot_lune(m, gamma, delta, show, format)
         else:
             raise KeyError("'view=%s' is not supported."%view)
 

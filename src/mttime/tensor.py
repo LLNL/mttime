@@ -11,7 +11,10 @@ import numpy as np
 
 def get_m_in_basis(m, in_basis, out_basis):
     """
-    Function to convert moment tensor between coordinate systems
+    Convert moment tensor between coordinate systems
+
+    A function that returns the moment tensor in a new coordinate system.
+    See supported coordinate systems below.
 
     :param m: moment tensor elements (M11, M22, M33, M12, M13, M23) for a given
         coordinate system (1, 2, 3).
@@ -20,11 +23,23 @@ def get_m_in_basis(m, in_basis, out_basis):
     :type in_basis: str
     :param out_basis: output moment tensor coordinate system.
     :type out_basis: str
-    :return: moment tensor in new coordinate system.
+    :return: moment tensor in a new coordinate system.
     :rtype: :class:`~numpy.ndarray`
+
+    .. rubric:: Supported coordinate systems:
+
+    .. cssclass: table-striped
+
+    ================   ==================   ==========================
+    ``basis``          vectors              reference
+    ================   ==================   ==========================
+    "NED"              north, east, down    Jost and Herrmann, 1989
+    "XYZ"              north, east, down    Aki and Richard, 1980
+    "USE"              up, south, east      Larson et al., 2010
+    "RTP"              r, theta, phi        Harvard/Global CMT convention
+    ================   ==================   ==========================
     """
     # Mrr = Mzz, Mtt = Mxx, Mpp = Myy, Mrt = Mxz, Mrp = -Myz, Mtp = -Mxy
-
     # name : component                  NED sign and indices
     # NED  : NN, EE, DD, NE, ND, ED --> [0, 1, 2, 3, 4, 5]
     # XYZ  : XX, YY, ZZ, XY, XZ, YZ --> [0, 1, 2, 3, 4, 5]
@@ -181,6 +196,9 @@ class Tensor(object):
 
     A container for all things related to the moment tensor ``m``.
     Optional ``**kwargs`` are used to write and plot inversion results.
+    Moment tensor elements will be stored in XYZ coordinates. Use
+    :meth:`~mttime.tensor.Tensor.get_tensor_elements` to convert between
+    coordinate systems.
 
     :param m: six independent moment tensor elements
         (M11, M22, M33, M12, M13, M23) in dyne-cm.
@@ -189,57 +207,20 @@ class Tensor(object):
     :type basis: str
     :param depth: source depth.
     :type depth: float
-    :param ts: data shift in the number of time points.
-    :type ts: int
-    :param weights: station weights.
-    :type weights: :class:`~numpy.ndarray`
-    :param station_VR: variance reduction at each station.
-    :type station_VR: :class:`~numpy.ndarray`
+    :param inversion_type: ``Deviatoric`` or ``Full``.
+    :type inversion_type: str
+    :param component: waveform components.
+    :type component: list of str
+    :param station_table: station table. Required header names are: station, distance, azimuth,
+        ts, dt, weights, VR, [ZRTNE] (one column for each component in ``component``), longitude,
+        and latitude.
+    :type station_table: :class:`~pandas.core.frame.DataFrame`
     :param total_VR: total variance reduction.
     :type total_VR: float
     :param dd: observed data stored as a single vector, required for plotting.
     :type dd: :class:`~numpy.ndarray`
     :param ss: synthetic seismograms stored as a single vector, required for plotting.
     :type ss: :class:`~numpy.ndarray`
-
-    :var inversion: inversion related parameters from ``**kwargs``.
-    :vartype inversion: dict
-    :var cmt: moment tensor elements in GCMT format: mrr, mtt, mpp, mrt, mrp, mtp.
-        Units are in N-m.
-    :vartype cmt: :class:`~numpy.ndarray`
-    :var iso: isotropic moment tensor elements.
-    :vartype iso: :class:`~numpy.ndarray`
-    :var dev: deviatoric moment tensor elements.
-    :vartype dev: :class:`~numpy.ndarray`
-    :var dc: double couple moment tensor elements.
-    :vartype dc: :class:`~numpy.ndarray`
-    :var clvd: CLVD moment tensor elements.
-    :vartype clvd: :class:`~numpy.ndarray`
-    :var eigenvalues: eigenvalues.
-    :vartype eigenvalues: :class:`~numpy.ndarray`
-    :var mo: total scalar seismic moment in Bowers and Hudson (1999) convention.
-        Unit is in dyne-cm.
-    :vartype mo: float
-    :var mw: moment magnitude in dyne-cm.
-    :vartype mw: float
-    :var mw_dev: deviatoric moment magnitude
-    :vartype mw_dev: float
-    :var miso: isotropic moment in dyne-cm.
-    :vartype miso: float
-    :var mdc: double-couple moment in dyne-cm.
-    :vartype mdc: float
-    :var mclvd: CLVD moment in dyne-cm.
-    :vartype mclvd: float
-    :var pdc: percentage of double-couple component.
-    :vartype pdc: float
-    :var pclvd: percentage of CLVD component.
-    :vartype pclvd: float
-    :var piso: percentage of isotropic component.
-    :vartype piso: float
-    :var fps: strike, dip, and rake of the two fault planes.
-    :vartype fps: list((float, float, float), (float, float, float))
-    :var lune: gamma and delta in lune source-type space.
-    :vartype lune: (float, float)
     """
     def __init__(self, m, basis="XYZ", **kwargs):
         self._input_basis = basis
@@ -248,6 +229,11 @@ class Tensor(object):
 
     @property
     def m(self):
+        """
+        Moment tensor elements
+
+        MXX, MYY, MZZ, MXY, MXZ, MYZ in dyne-cm.
+        """
         return self._m
 
     @m.setter
@@ -262,26 +248,17 @@ class Tensor(object):
 
     def get_tensor_elements(self, basis="XYZ"):
         """
-        Function that returns a moment tensor in the specified system
-        coordinates
+        Retrieve the moment tensor elements
 
-        :param basis: system coordinates. See supported coordinate
-        systems below.
+        Function that returns the moment tensor in the specified system
+        coordinates.
+
+        :param basis: system coordinates, default is ``XYZ``. Refer to
+            :func:`~mttime.tensor.get_m_in_basis` for supported systems.
         :type basis: str
         :return: a dictionary of moment tensor elements.
+        :rtype: dict
 
-        .. rubric:: Supported coordinate systems:
-
-        .. cssclass: table-striped
-
-        ================   ==================   ==========================
-        ``basis``          vectors              reference
-        ================   ==================   ==========================
-        "NED"              north, east, down    Jost and Herrmann, 1989
-        "XYZ"              east, north, up      Aki and Richard, 1980
-        "USE"              up, south, east      Larson et al., 2010
-        "RTP"              r, theta, phi        Harvard/Global CMT convention
-        ================   ==================   ==========================
         """
         system_mapping = dict(XYZ=["XX", "YY", "ZZ", "XY", "XZ", "YZ"],
                               NED=["NN", "EE", "DD", "NE", "ND", "ED"],
@@ -299,9 +276,43 @@ class Tensor(object):
         """
         Moment tensor decomposition
 
-        A function that decomposes the moment tensor from attribute ``m`` and assigns the result
-        to various other attributes. Refer to :class:`~mttime.tensor.Tensor` for the full
-        list of variables after decomposition.
+        A function that decomposes the moment tensor from attribute ``m``.
+        Moment is in dyne-cm.
+
+        .. rubric:: _`Attributes`
+
+        ``iso``: :class:`~numpy.ndarray`
+            isotropic moment tensor elements.
+        ``dev``: :class:`~numpy.ndarray`
+            deviatoric moment tensor elements.
+        ``dc``: :class:`~numpy.ndarray`
+            double couple moment tensor elements.
+        ``clvd``: :class:`~numpy.ndarray`
+            CLVD moment tensor elements.
+        ``eigenvalues``: :class:`~numpy.ndarray`
+            eigenvalues.
+        ``mo``: float
+            total scalar seismic moment in Bowers and Hudson (1999) convention.
+        ``mw``: float
+            moment magnitude.
+        ``mw_dev``: float
+            deviatoric moment magnitude.
+        ``miso``: float
+            isotropic moment.
+        ``mdc``: float
+            double-couple moment.
+        ``mclvd``: float
+            CLVD moment.
+        ``pdc``: float
+            percentage of double-couple component.
+        ``pclvd``: float
+            percentage of CLVD component.
+        ``piso``: float
+            percentage of isotropic component.
+        ``fps``: list of (float, float, float)
+            strike, dip, and rake of the two fault planes.
+        ``lune``: (float, float)
+            gamma and delta in lune source-type space.
         """
         m = self._m
         M = np.array([[m[0], m[3], m[4]],
@@ -399,7 +410,7 @@ class Tensor(object):
 
     def write(self):
         """
-        Write detailed solution file
+        Write detailed solution to file
 
         A function that saves the detailed moment tensor solution to a file named
         `d[depth].mtinv.out`.
@@ -486,6 +497,10 @@ class Tensor(object):
         return out
 
     def __str__(self):
+        keys = ["inversion_type", "depth", "mw", "total_VR"]
+        #for key in keys:
+        #    if key in self.__dict__.keys():
+
         ret = ("Mxx={m[0]:>10.3e} Myy={m[1]:>10.3e} Mzz={m[2]:>10.3e}\n"
                "Mxy={m[3]:>10.3e} Mxz={m[4]:>10.3e} Myz={m[5]:>10.3e}\n"
                )

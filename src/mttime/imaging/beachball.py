@@ -5,7 +5,7 @@
 """
 Draws a beach ball diagram of a moment tensor
 
-Source codes are adapted from the :module:`~obspy.imaging.mopad_wrapper`.
+Source codes are adapted from the :class:`~obspy.imaging.mopad_wrapper`.
 
 """
 
@@ -46,7 +46,7 @@ def beach(fm, linewidth=1, facecolor='0.75', bgcolor='w', edgecolor='k',
     :param xy: original position of the beach ball. Default is ``(0, 0)``
     :type xy: tuple
     :param width: width of the beach ball (aka symbol size). Default is ``200``.
-    :type width: int
+    :type width: float
     :param size: number of points interpolated to draw the curve. Default is ``100``.
     :type size: int
     :param nofill: no shading of the beach ball. Default is ``False``.
