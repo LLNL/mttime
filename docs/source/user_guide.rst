@@ -7,7 +7,7 @@ User Guide
 
 The user guide covers the inverse routine and file structure. Users brand new
 to moment tensor inversion should check out the Jupyter Notebook
-`tutorials <https://github.com/LLNL/tdmtpy/tree/master/examples/notebooks>`_
+`tutorials <https://github.com/LLNL/mttime/tree/master/examples/notebooks>`_
 for an complete example that includes data processing and synthetics calculation.
 
 Further information on any specific method can be obtained in the :ref:`api`.
@@ -23,11 +23,11 @@ The inverse routine is divided into three main parts:
 .. code-block:: python
 
    >>> # import the package
-   >>> import tdmtpy
+   >>> import mttime
 
    >>> # 1. read input file and set up the inversion
-   >>> config = tdmtpy.Configure(path_to_file="mtinv.in") 
-   >>> mt = tdmtpy.Inversion(config=config)
+   >>> config = mttime.Configure(path_to_file="mtinv.in") 
+   >>> mt = mttime.Inversion(config=config)
 
    >>> # 2. Run inversion and plot the result (if plotting function is turned on)
    >>> mt.invert()
@@ -74,12 +74,12 @@ headers and a station table:
 .. literalinclude:: example/mtinv.in
    :language: text
 
-When you call the :class:`~tdmtpy.configure.Configure` object it will parse the input
+:class:`~mttime.core.configure.Configure` object will parse the input
 text file.
 
 .. code-block:: python
 
-   >>> config = tdmtpy.Configure(path_to_file="mtinv.in")
+   >>> config = mttime.Configure(path_to_file="mtinv.in")
 
 The headers have two columns: a parameter name and its corresponding value. If the values are left blank,
 the default values will be used instead. A descrption of the parameters are shown here:
@@ -140,7 +140,7 @@ latitude     station latitude
 Waveform Data
 ^^^^^^^^^^^^^
 
-tdmtpy expects both observed and synthetic Green's functions to be fully processed. 
+mttime expects both observed and synthetic Green's functions to be fully processed. 
 This means they are corrected for instrument response, filtered, and decimated, 
 and saved as SAC binary files.
 
@@ -195,7 +195,13 @@ If we change the format to tensor (such that ``green="tensor"``), the file names
 Output Files
 ------------
 
-Running the inversion with the example above will generate the following outputs:
+Running the inversion with the example above will generate the following outputs.
+
+.. code-block:: python
+
+   >>> mt = mttime.Inversion(config=config)
+   >>> mt.invert()
+   >>> mt.write()
 
 * Text files:
 
@@ -221,7 +227,35 @@ shows the solution as function of source depth.
 
 .. figure:: example/depth.bbmw.png
 
-For more details about the plotting function refer to the documentation
-:func:`~tdmtpy.inversion.Inversion.plot`.
+Figure Options
+--------------
 
+There are more display options available in
+:meth:`mttime.core.inversion.Inversion.plot`.
+
+  * ``view="waveform"`` - MT solution and waveform fits.
+  * ``view="depth"`` - MT solution as a function of source depth.
+  * ``view="map"`` - map view.
+  * ``view="lune"`` - full MT source-type on the lune.
+
+In the example above we set ``mt.config.plot=True``, which is equivalent to:
+
+.. code-block:: python
+
+   >>> mt.plot(view="waveform")
+   >>> mt.plot(view="depth") # if depth is not fixed
+
+To plot the solution on a map or lune:
+
+.. code-block:: python
+
+   >>> mt.plot(view="map", show=True)
+
+.. figure:: example/map.png
+
+.. code-block:: python
+
+   >>> mt.plot(view="lune", show=True)
+
+.. figure:: example/lune.png
 

@@ -17,8 +17,8 @@ Installation
 
 * Create a Python environment
 * Install ObsPy and pandas
-* Make sure you have `cloned the repository <https://github.com/LLNL/tdmtpy>`_
-* Install tdmtpy
+* Make sure you have `cloned the repository <https://github.com/LLNL/mttime>`_
+* Install mttime
 
 I recommend installing Python via `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
 or `Anaconda <https://docs.anaconda.com/anaconda/install/>`_. Choose Miniconda for a lower footprint.
@@ -27,7 +27,7 @@ Then follow the instructions on their sites to install
 and `pandas <https://pandas.pydata.org/pandas-docs/stable/getting_started/install.html>`_
 for your given platform.
 
-Download tdmtpy and install it from source. If you installed Python via conda make sure you activate
+Download mttime and install it from source. If you installed Python via conda make sure you activate
 the environment where ObsPy and pandas are installed.
 
 .. code-block:: bash
@@ -35,9 +35,9 @@ the environment where ObsPy and pandas are installed.
    # Activate environment
    conda activate your_environment
 
-   # Build and install tdmtpy
-   git clone https://github.com/LLNL/tdmtpy
-   cd tdmtpy
+   # Build and install mttime
+   git clone https://github.com/LLNL/mttime
+   cd mttime
    python setup.py install
 
 Finally, if you want to run the tutorials you will need to install `Jupyter Notebook <https://jupyter.org/install>`_.
@@ -55,15 +55,15 @@ save and plot the result to file:
 
 .. code-block:: bash
 
-   tdmtpy-run mtinv.in
+   mttime-run mtinv.in
 
 The equivalent in the Python console:
 
 .. code-block:: python
 
-   >>> import tdmtpy
-   >>> config = tdmtpy.Configure(path_to_file="mtinv.in")
-   >>> mt = tdmtpy.Inversion(config=config)
+   >>> import mttime
+   >>> config = mttime.Configure(path_to_file="mtinv.in")
+   >>> mt = mttime.Inversion(config=config)
    >>> mt.invert()
    >>> mt.write()
 

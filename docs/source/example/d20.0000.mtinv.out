@@ -1,31 +1,31 @@
-Deviatoric Moment Tensor Inversion
+Full Moment Tensor Inversion
 Depth = 20.0000 (km)
-Mo = 3.972e+22 (dyne-cm)
-Mw = 4.37
-Percent DC   =  96
-Percent CLVD =   4
-Percent ISO  =   0
-Fault Plane 1: Strike=235 Dip=79 Rake=-3 
-Fault Plane 2: Strike=325 Dip=87 Rake=-169
-Percent Variance Reduction = 78.39
+Mo = 5.024e+22 (dyne-cm)
+Mw = 4.43
+Percent DC   =  88
+Percent CLVD =   3
+Percent ISO  =   8
+Fault Plane 1: Strike=235 Dip=78 Rake=-3 
+Fault Plane 2: Strike=326 Dip=87 Rake=-168
+Percent Variance Reduction = 70.68
 
 Moment Tensor Elements: Aki and Richards Cartesian Coordinates
 Mxx        Myy        Mzz        Mxy        Mxz        Myz
--3.615e+22 3.600e+22  1.551e+20  -1.350e+22 5.882e+21  5.045e+21 
+-3.665e+22 4.684e+22  2.262e+21  -1.572e+22 7.151e+21  6.393e+21 
 
-GCMT convention (N-m)
+Harvard/CMT convention
 Mrr        Mtt        Mpp        Mrt        Mrp        Mtp
-1.551e+13  -3.615e+15 3.600e+15  5.882e+14  -5.045e+14 1.350e+15 
+2.262e+21  -3.665e+22 4.684e+22  7.151e+21  -6.393e+21 1.572e+22 
 
-Eigenvalues: 3.884e+22 8.794e+20
-Lune Coordinates: 1.11   0.00  
+Eigenvalues: 5.024e+22 3.285e+21 -4.107e+22
+Lune Coordinates: -0.94  6.35  
 Station Information
-    station  distance  azimuth  ts  npts   dt  Z  R  T weights     VR  longitude  latitude
- BK.QRDG.00     80.99   335.29  31   150  1.0  1  1  1  1.0000  88.92    -122.14     38.48
- BK.RUSS.00     81.16   353.18  32   100  1.0  1  1  1  1.0021  70.51    -121.87     38.54
-  BK.CVS.00     84.88   313.73  31   100  1.0  1  1  1  1.0480  76.67    -122.46     38.35
- BK.OAKV.00     88.89   320.02  30   100  1.0  1  1  1  1.0975  61.08    -122.41     38.43
- BK.FARB.00    110.46   263.41  30   100  1.0  1  1  1  1.3639  57.55    -123.00     37.70
-  BK.SAO.00    120.23   166.71  31   150  1.0  1  1  1  1.4845  84.10    -121.45     36.76
-  BK.CMB.00    122.83    78.33  30   150  1.0  1  1  1  1.5166  73.38    -120.39     38.03
- BK.MNRC.00    132.06   333.21  32   150  1.0  1  1  1  1.6306  83.70    -122.44     38.88
+    station distance azimuth  ts  npts   dt  Z  R  T weights    VR longitude latitude
+ BK.QRDG.00    80.99  335.29  32   150 1.00  1  1  1    1.00 85.48  -122.140   38.480
+ BK.RUSS.00    81.16  353.18  32   150 1.00  1  1  1    1.00 64.02  -121.870   38.540
+  BK.CVS.00    84.88  313.73  31   150 1.00  1  1  1    1.05 72.63  -122.460   38.350
+ BK.OAKV.00    88.89  320.02  31   150 1.00  1  1  1    1.10 34.91  -122.410   38.430
+ BK.FARB.00   110.46  263.41  31   150 1.00  1  1  1    1.36 46.09  -123.000   37.700
+  BK.SAO.00   120.23  166.71  31   150 1.00  1  1  1    1.48 81.44  -121.450   36.760
+  BK.CMB.00   122.83   78.33  31   150 1.00  1  1  1    1.52 81.48  -120.390   38.030
+ BK.MNRC.00   132.06  333.21  32   150 1.00  1  1  1    1.63 78.38  -122.440   38.880

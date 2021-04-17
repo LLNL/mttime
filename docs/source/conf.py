@@ -24,20 +24,20 @@ sys.path.insert(0, os.path.abspath('../../src'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'tdmtpy'
+project = 'mttime'
 copyright = '2020, Lawrence Livermore National Security, LLC'
 author = 'Andrea Chiang'
 
 # The short X.Y version.
-import tdmtpy
+import mttime
 from packaging.version import parse
-parsed_version = parse(tdmtpy.__version__)
+parsed_version = parse(mttime.__version__)
 version = ".".join(parsed_version.base_version.split(".")[:2])
 # The full version, including alpha/beta/rc tags
 if parsed_version.is_postrelease:
     release = parsed_version.base_version
 else:
-    release = tdmtpy.__version__
+    release = mttime.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -107,7 +107,7 @@ autoclass_content = 'class'
 pygments_style = 'default'
 
 # A list of ignored prefixes for module index sorting.
-modindex_common_prefix = ['tdmtpy.']
+modindex_common_prefix = ['mttime.']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
@@ -139,7 +139,7 @@ html_static_path = ['_static']
 #html_title = None
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-html_short_title = 'tdmtpy'
+html_short_title = 'mttime'
 
 html_theme_options = {
     'canonical_url': '',
@@ -192,7 +192,7 @@ html_show_sourcelink = True
 html_show_copyright = True
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'tdmtpydoc'
+htmlhelp_basename = 'mttimedoc'
 
 # If true, the reST sources are included in the HTML build as _sources/name.
 html_copy_source = True

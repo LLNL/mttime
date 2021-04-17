@@ -3,6 +3,12 @@ Changelog
 
 Current release is version 1.0.0
 
+
+2020
+----
+- Package name has been changed to mttime
+- Fixes to saving focal mechanisms in vector file format.
+
 2020-01-20
 ----------
 

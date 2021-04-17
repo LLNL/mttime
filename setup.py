@@ -12,9 +12,9 @@ import re
 from setuptools import find_packages, setup
 
 
-NAME = "tdmtpy"
+NAME = "mttime"
 PACKAGES = find_packages(where="src")
-META_PATH = os.path.join("src", "tdmtpy", "__init__.py")
+META_PATH = os.path.join("src", "mttime", "__init__.py")
 KEYWORDS = ["seismology","inversion","source"]
 CLASSIFIERS = [
     "Development Status :: 3 - Alpha",
@@ -35,7 +35,7 @@ INSTALL_REQUIRES =[
 
 ENTRY_POINTS = {
     "console_scripts": [
-        "tdmtpy-run = tdmtpy.scripts.run:main",
+        "mttime-run = mttime.scripts.run:main",
     ]
 }
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         name=NAME,
         description="Time domain moment tensor inverse routine",
         license="BSD License",
-        url="https://github.com/LLNL/tdmtpy",
+        url="https://github.com/LLNL/mttime",
         version=VERSION,
         author="Andrea Chiang",
         author_email="chiang4@llnl.gov",

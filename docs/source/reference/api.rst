@@ -5,7 +5,7 @@
 API Reference
 =============
 
-This page gives an overview of all public tdmtpy objects, methods
+This page gives an overview of all public mttime objects, methods
 and functions.
 
 Core Modules
@@ -16,11 +16,21 @@ Core Modules
    :toctree: autogen
    :nosignatures:
 
-   tdmtpy.configure
-   tdmtpy.inversion
-   tdmtpy.tensor
-   tdmtpy.image
-   tdmtpy.utils
+   mttime.core.configure
+   mttime.core.inversion
+   mttime.core.tensor
+   mttime.core.utils
+
+Plotting Modules
+----------------
+
+.. autosummary::
+   :template: module.rst
+   :toctree: autogen
+   :nosignatures:
+
+   mttime.imaging.source
+   mttime.imaging.beachball
 
 Scripts
 -------
@@ -30,4 +40,4 @@ Scripts
    :toctree: autogen
    :nosignatures:
 
-   tdmtpy.scripts.run
+   mttime.scripts.run
