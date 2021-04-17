@@ -67,3 +67,6 @@ docs/reference/autogen
 .ipynb_checkpoints
 
 _tmp/
+
+# JetBrains
+.idea
