@@ -3,9 +3,9 @@
 # LLNL-CODE-814839
 # author: Andrea Chiang (andrea@llnl.gov)
 """
-Draws a beach ball diagram of a moment tensor
+Draws the beach ball diagram of a moment tensor
 
-Source codes are adapted from the :class:`~obspy.imaging.mopad_wrapper`.
+Source codes are adapted from :mod:`~obspy.imaging.mopad_wrapper`.
 
 """
 

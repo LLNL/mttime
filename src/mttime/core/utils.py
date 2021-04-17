@@ -11,12 +11,14 @@ from scipy.signal import fftconvolve
 import pkg_resources
 
 
-# Code snippets from obspy.core.util.misc
 def to_int_or_zero(value):
     """
     Converts given value to an integer or returns 0 if it fails.
 
-    :param value: Arbitrary data type.
+    Function taken from :mod:`~obspy.core.util.misc`
+
+    :param value: arbitrary data type.
+    :return:
     :rtype: int
 
     """

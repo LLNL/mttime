@@ -9,8 +9,8 @@ mttime command line utility
 from argparse import ArgumentParser
 
 from mttime import __version__
-from mttime.configure import Configure
-from mttime.inversion import Inversion
+from mttime.core.configure import Configure
+from mttime.core.inversion import Inversion
 
 def main(argv=None):
     """

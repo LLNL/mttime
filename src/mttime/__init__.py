@@ -24,5 +24,5 @@ to obtain the seismic moment tensor.
 
 __version__ = "1.1.dev0"
 
-from .configure import Configure
-from .inversion import Inversion
+from mttime.core.configure import Configure
+from mttime.core.inversion import Inversion

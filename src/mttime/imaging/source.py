@@ -8,10 +8,10 @@ Plotting routines for mttime
 .. warning::
 
    This module should NOT be used directly instead use the class method
-   :meth:`~mttime.inversion.Inversion.plot`.
+   :meth:`~mttime.core.inversion.Inversion.plot`.
+
 """
 
-import os
 import warnings
 import numpy as np
 
@@ -19,16 +19,16 @@ from matplotlib.gridspec import GridSpec
 from matplotlib import transforms
 from matplotlib.path import Path as mpath
 from obspy.geodetics.base import kilometers2degrees
-#from .beachball import beach
 import matplotlib.pyplot as plt
+
+from mttime.imaging.beachball import beach
 from mttime.imaging import MTTIME_MPLSTYLE
 plt.style.use(MTTIME_MPLSTYLE)
 
-from mttime.utils import CARTOPY_VERSION
+from mttime.core.utils import CARTOPY_VERSION
 if CARTOPY_VERSION and CARTOPY_VERSION >= [0, 17, 0]:
     import cartopy.crs as ccrs
     import cartopy.feature as cfeature
-    #import cartopy.io.img_tiles as cimgt
     HAS_CARTOPY = True
 else:
     HAS_CARTOPY = False
@@ -47,7 +47,7 @@ def plot_waveform_fits(tensor, show, format, nrows=10):
     Plot waveform fits and focal mechanisms
 
     :param tensor: moment tensor solution.
-    :type tensor: :class:`~mttime.tensor.Tensor`
+    :type tensor: :class:`~mttime.core.tensor.Tensor`
     :param show: display image after plotting instead of saving it to file.
     :type show: bool
     :param format: figure file format.
@@ -157,7 +157,7 @@ def beach_mw_depth(tensors, event, show, format):
     as a function of source depth.
 
     :param tensors: moment tensor solutions at various depths.
-    :type tensors: a list of :class:`~mttime.tensor.Tensor`
+    :type tensors: a list of :class:`~mttime.core.tensor.Tensor`
     :param event: event origin time, longitude and latitude.
     :type event: dict
     :param show: display image after plotting instead of saving it to file.
@@ -183,8 +183,9 @@ def beach_mw_depth(tensors, event, show, format):
     ax2.set_ylabel("Mw", color=color2)
     source_depth = [tensor.depth for tensor in tensors]
     margin = (max(source_depth)-min(source_depth))/6
-    #if margin == 0:
-    #    margin = 1.0
+    # if depth is fixed set margin to 1.0
+    if margin == 0:
+        margin = 1.0
     ax2.set_xlim([min(source_depth)-margin, max(source_depth)+margin])
     ax2.set_ylim(0,12)
     ax2.set_yticks([0, 2, 4, 6, 8, 10])

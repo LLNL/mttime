@@ -24,7 +24,7 @@ import pandas as pd
 
 class Configure(object):
     """
-    Configure object for :class:`~mttime.inversion.Inversion`
+    Configure object for :class:`~mttime.core.inversion.Inversion`
 
     Sets up the moment tensor inverse routine. ``**kwargs`` can be provided
     either in ``path_to_file`` or during class instantiation. ``df`` and ``depth``
@@ -36,7 +36,7 @@ class Configure(object):
         Input file should be located in the project root directory.
     :type path_to_file: str
     :param df: station table, required if ``path_to_file=None``.
-    :type: :class:`~pandas.core.frame.DataFrame`
+    :type df: :class:`~pandas.DataFrame`
     :param datetime: event origin time.
     :type datetime: str, optional
     :param longitude: event longitude.
@@ -44,7 +44,7 @@ class Configure(object):
     :param latitude: event latitude.
     :type latitude: float, optional
     :param depth: source depths to invert, required if ``path_to_file=None``
-    :type depth: float, int, list of floats/ints
+    :type depth: float, int, list
     :param path_to_data: path to data files, relative to root directory.
         Defaults is ``"."``.
     :type path_to_data: str
@@ -57,7 +57,7 @@ class Configure(object):
     :param components: waveform components, options are ``"Z"`` for vertical component,
         or ``"ZRT"`` for three-component data in vertical, radial and transverse components, and
         ``"ZNE"`` for vertical, north and east. Default is ``"ZRT"``.
-    :type components: list of str
+    :type components: str
     :param degree: degrees of freedom allowed in the inversion, options are
         ``5`` for deviatoric or ``6`` for full. Default is ``5``.
     :type degree: int
@@ -134,7 +134,7 @@ class Configure(object):
         :type path_to_file: str
         :param types: keyword arguments
         :type types: dict
-        :return: a dictionary of parameters for a single :class:`~mttime.configure.Configure` object
+        :return: a dictionary of parameters for a single :class:`~mttime.core.configure.Configure` object
         :rtype: dict
         """
 
@@ -278,7 +278,7 @@ class Configure(object):
 
         :param file: path to input file or pandas DataFrame object
             containing headers and station information
-        :type file: str or :class:`~pandas.core.frame.DataFrame`
+        :type file: str or :class:`~pandas.DataFrame`
         """
 
         # Read station table
@@ -296,7 +296,7 @@ class Configure(object):
         # Components to invert
         df_col = df["used"].apply(lambda x: pd.Series(list(x)))
 
-        if len(df.columns) < self.ncomp:
+        if len(df_col.columns) < self.ncomp:
             df_col = pd.concat([df_col] * (self.ncomp), axis=1, ignore_index=True)
         else:
             df_col = df_col.iloc[:, [i for i in range(self.ncomp)]]
@@ -332,7 +332,12 @@ class Configure(object):
                 )
         f = "{0:>12}: {1}\n"
         ret = "".join([f.format(key, str(getattr(self, key))) for key in keys])
-        ret = "\n".join([ret, self.station_table.to_string(index=False), "\n"])
+        ret = "\n".join(
+            [ret,
+             "| STATION TABLE |",
+             self.station_table.to_string(float_format="{:.2f}".format, index=False),
+            ]
+        )
 
         return ret
 

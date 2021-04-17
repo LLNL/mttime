@@ -197,7 +197,7 @@ class Tensor(object):
     A container for all things related to the moment tensor ``m``.
     Optional ``**kwargs`` are used to write and plot inversion results.
     Moment tensor elements will be stored in XYZ coordinates. Use
-    :meth:`~mttime.tensor.Tensor.get_tensor_elements` to convert between
+    :meth:`~mttime.core.tensor.Tensor.get_tensor_elements` to convert between
     coordinate systems.
 
     :param m: six independent moment tensor elements
@@ -210,11 +210,11 @@ class Tensor(object):
     :param inversion_type: ``Deviatoric`` or ``Full``.
     :type inversion_type: str
     :param component: waveform components.
-    :type component: list of str
+    :type component: list(str)
     :param station_table: station table. Required header names are: station, distance, azimuth,
         ts, dt, weights, VR, [ZRTNE] (one column for each component in ``component``), longitude,
         and latitude.
-    :type station_table: :class:`~pandas.core.frame.DataFrame`
+    :type station_table: :class:`~pandas.DataFrame`
     :param total_VR: total variance reduction.
     :type total_VR: float
     :param dd: observed data stored as a single vector, required for plotting.
@@ -222,10 +222,27 @@ class Tensor(object):
     :param ss: synthetic seismograms stored as a single vector, required for plotting.
     :type ss: :class:`~numpy.ndarray`
     """
+    _decomp_keys = [
+        "eigenvalues",
+        "mo",
+        "mw",
+        "mw_dev",
+        "miso",
+        "mdc",
+        "mclvd",
+        "pdc",
+        "pclvd",
+        "piso",
+        "fps",
+        "lune"
+    ]
     def __init__(self, m, basis="XYZ", **kwargs):
         self._input_basis = basis
         self._m = m
         self._parse_inversion_info(**kwargs)
+        self._decomposition = False
+        for key in self._decomp_keys:
+            setattr(self, key, None)
 
     @property
     def m(self):
@@ -254,7 +271,7 @@ class Tensor(object):
         coordinates.
 
         :param basis: system coordinates, default is ``XYZ``. Refer to
-            :func:`~mttime.tensor.get_m_in_basis` for supported systems.
+            :func:`~mttime.core.tensor.get_m_in_basis` for supported systems.
         :type basis: str
         :return: a dictionary of moment tensor elements.
         :rtype: dict
@@ -407,6 +424,26 @@ class Tensor(object):
         self.piso = piso
         self.fps = fps
         self.lune = lune
+        self._decomposition = True
+
+    def get_decomposition(self):
+        """
+        Get the decomposition of a moment tensor
+
+        A function that returns the decomposed moment tensor in a dictionary.
+        Refer to :meth:`~mttime.core.tensor.Tensor.decompose` for the complete list
+        of decomposition attributes.
+
+        :return: moment tensor decomposition.
+        :rtype: dict
+        """
+        out = {}
+        if not self._decomposition:
+            self.decompose()
+        for attr in self._decomp_keys:
+            out[attr] = getattr(self, attr)
+
+        return out
 
     def write(self):
         """
@@ -454,12 +491,20 @@ class Tensor(object):
                         )
 
         # Update string print format
-        self.station_table["VR"] = self.station_table["VR"].map("{:.2f}".format)
-        self.station_table["weights"] = self.station_table["weights"].map("{:.4f}".format)
-
+        formatters =  {
+            "distance": "{:.2f}".format,
+            "azimuth": "{:.2f}".format,
+            "dt": "{:.2f}".format,
+            "weights": "{:.2f}".format,
+            "VR": "{:.2f}".format,
+            "longitude": "{:.3f}".format,
+            "latitude": "{:.3f}".format,
+        }
         with open(filename, "w") as f:
             f.write(out)
-            f.write("%s\n" % (self.station_table.to_string(index=False)))
+            f.write("%s\n"%(
+                self.station_table.to_string(formatters=formatters, index=False)
+            ))
 
     def _parse_inversion_info(self, **kwargs):
         self.depth = kwargs.get("depth")
@@ -468,7 +513,9 @@ class Tensor(object):
         self.total_VR = kwargs.get("total_VR")
 
         self.station_table = kwargs.get("station_table").copy(deep=True)
-        self.station_table["VR"] = kwargs.get("station_VR")
+        self.station_table.insert(
+            loc=7 + len(self.components), column="VR", value=kwargs.get("station_VR")
+        )
 
         self._data = kwargs.get("dd")
         self._synthetics = kwargs.get("ss")
@@ -497,15 +544,24 @@ class Tensor(object):
         return out
 
     def __str__(self):
-        keys = ["inversion_type", "depth", "mw", "total_VR"]
-        #for key in keys:
-        #    if key in self.__dict__.keys():
+        f = "{0:>15}: {1}"
 
-        ret = ("Mxx={m[0]:>10.3e} Myy={m[1]:>10.3e} Mzz={m[2]:>10.3e}\n"
-               "Mxy={m[3]:>10.3e} Mxz={m[4]:>10.3e} Myz={m[5]:>10.3e}\n"
-               )
+        # inversion parameters
+        ret = "\n".join(
+            [f.format(key, str(getattr(self, key)))
+             for key in ("inversion_type", "depth", "mw", "total_VR")
+             if key in self.__dict__.keys()]
+        )
 
-        return ret.format(m=self._m)
+        # tensor elements
+        mtout = (
+            "Mxx = {m[0]:>10.3e} Myy = {m[1]:>10.3e} Mzz = {m[2]:>10.3e}\n"
+            "Mxy = {m[3]:>10.3e} Mxz = {m[4]:>10.3e} Myz = {m[5]:>10.3e}\n"
+        )
+        mtout = mtout.format(m=self._m)
+        ret = "\n".join([ret, mtout])
+
+        return ret
     
     def _repr_pretty_(self, p, cycle):
         p.text(str(self))

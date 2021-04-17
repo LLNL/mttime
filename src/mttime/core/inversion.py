@@ -4,14 +4,50 @@
 # author: Andrea Chiang (andrea@llnl.gov)
 """
 Time domain moment tensor inverse routines
+
+.. rubric:: Example
+
+.. code-block:: python
+
+    >>> config = mttime.Configure(path_to_file="examples/synthetic/mtinv.in")
+    >>> tdmt = mttime.Inversion(config=config)
+    >>> print(tdmt)
+         event: {'datetime': '2019-07-16T20:10:31.473', 'longitude': -121.757, 'latitude': 37.8187}
+         depth: [10.0, 20.0]
+         green: herrmann
+    components: ['Z', 'R', 'T']
+        degree: 5
+        weight: distance
+          plot: False
+     correlate: False
+    | STATION TABLE |
+        station  distance  azimuth  ts  npts   dt  Z  R  T  longitude  latitude filter  nc  np  lcrn  hcrn model
+     BK.FARB.00    110.00   263.00  30   100 1.00  0  0  0    -123.00     37.70     bp   2   2  0.05  0.10  gil7
+      BK.SAO.00    120.00   167.00  30   150 1.00  0  0  1    -121.45     36.76     bp   2   2  0.05  0.10  gil7
+      BK.CMB.00    123.00    78.00  30   150 1.00  0  0  0    -120.39     38.03     bp   2   2  0.05  0.10  gil7
+     BK.MNRC.00    132.00   333.00  30   150 1.00  1  1  1    -122.44     38.88     bp   2   2  0.05  0.10  gil7
+    | PREFERRED SOLUTION |
+    None
+    >>> tdmt.invert()
+    Deviatoric Moment Tensor Inversion
+    Depth = 10.0000 km
+    Mw = 3.97
+    Percent DC/CLVD/ISO = 100/0/0
+    VR = 100.00%%
+
+    Deviatoric Moment Tensor Inversion
+    Depth = 20.0000 km
+    Mw = 4.25
+    Percent DC/CLVD/ISO = 62/38/0
+    VR = 87.05%%
 """
 
 from copy import deepcopy
 import numpy as np
 from obspy.core import read, Stream
 
-from . import utils
-from .tensor import Tensor
+from mttime.core import utils
+from mttime.core.tensor import Tensor
 
 
 class Inversion(object):
@@ -22,12 +58,12 @@ class Inversion(object):
     solutions.
 
     :param config: object containing the necessary parameters for setting up the inverse routine
-    :type config: :class:`~mttime.configure.Configure`
+    :type config: :class:`~mttime.core.configure.Configure`
 
     :var streams: processed waveform data.
     :vartype streams: a list of :class:`~obspy.core.stream.Stream`
     :var moment_tensors: moment tensor solutions.
-    :vartype moment_tensors: a list of :class:`~mttime.tensor.Tensor`
+    :vartype moment_tensors: a list of :class:`~mttime.core.tensor.Tensor`
     :var preferred_tensor_id: index to the preferred moment tensor solution
         (maximum variance reduction).
     :vartype preferred_tensor_id: int
@@ -45,37 +81,12 @@ class Inversion(object):
         self.moment_tensors = None
         self.preferred_tensor_id = None
 
-    def load_data(self):
+    def _load_data(self):
         """
         Function to read binary SAC data
 
         Reads binary SAC data into a list of :class:`~obspy.core.stream.Stream` objects,
         and assigns the list to the attribute ``streams``.
-
-        .. rubric:: Example
-
-        .. code-block:: python
-
-           >>> config = mttime.Configure(path_to_file="example/synthetic/mtinv.in")
-           >>> tdmt = mttime.Inversion(config=config)
-           >>> tdmt.load_data()
-           >>> tdmt.streams
-           [3 Trace(s) in Stream:
-           BK.FARB.00.Z | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.FARB.00.R | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.FARB.00.T | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples,
-           3 Trace(s) in Stream:
-           BK.SAO.00.Z | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.SAO.00.R | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.SAO.00.T | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples,
-           3 Trace(s) in Stream:
-           BK.CMB.00.Z | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.CMB.00.R | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.CMB.00.T | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples,
-           3 Trace(s) in Stream:
-           BK.MNRC.00.Z | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.MNRC.00.R | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples
-           BK.MNRC.00.T | 1969-12-31T23:59:30.000000Z - 1970-01-01T00:04:10.000000Z | 1.0 Hz, 281 samples]
 
         """
         files = self.config.path_to_data + "/" + self.config.station_table.station.values
@@ -93,29 +104,9 @@ class Inversion(object):
         Will perform multiple inversions if more than one source depth provided, and
         plot the results if attribute ``config.plot=True``
 
-        .. rubric:: Example
-
-        Following the example in :func:`~mttime.inversion.Inversion.load_data()`:
-
-        .. code-block:: python
-
-           >>> tdmt.invert()
-           Deviatoric Moment Tensor Inversion
-           Depth = 10.0000 km
-           Mw = 3.97
-           Percent DC/CLVD/ISO = 100/0/0
-           VR = 100.00%%
-
-           Deviatoric Moment Tensor Inversion
-           Depth = 20.0000 km
-           Mw = 4.25
-           Percent DC/CLVD/ISO = 62/38/0
-           VR = 87.05%%
-
         """
-        self.load_data()
+        self._load_data()
         self.config.station_table.insert(loc=6+self.config.ncomp, column="weights", value=None)
-        self.config.station_table.insert(loc=7+self.config.ncomp, column="VR", value=None)
 
         tensors = []
         for _depth in self.config.depth:
@@ -130,7 +121,7 @@ class Inversion(object):
         self.moment_tensors = tensors
 
         if self.config.plot:
-            self.plot(view="normal", show=show)
+            self.plot(view="waveform", show=show)
             if len(self.config.depth) > 1:
                 self.plot(view="depth", show=show)
 
@@ -493,7 +484,7 @@ class Inversion(object):
         between data and synthetic waveforms).
 
         :return: the preferred moment tensor solution.
-        :rtype: a :class:`~mttime.tensor.Tensor` object.
+        :rtype: a :class:`~mttime.core.tensor.Tensor` object.
         """
         if self.preferred_tensor_id is None:
             return None
@@ -526,7 +517,7 @@ class Inversion(object):
 
         Various options available to display the results.
 
-        :param view: type of figure to produce. Default ``normal`` creates the
+        :param view: type of figure to produce. Default ``waveform`` creates the
             standard figure with focal mechanisms and waveform fits.
             ``depth`` shows the focal mechanism and moment magnitude as a
             function of depth. ``map`` plots stations and focal mechanisms in map view.
@@ -537,17 +528,17 @@ class Inversion(object):
         :type show: bool
         :param format: figure file format, default is ``"eps"``.
         :type format: str
-        :param option: Optional parameter if view is set to ``normal``. The default plots all
+        :param option: Optional parameter if view is set to ``waveform``. The default plots all
             solutions. Set to ``preferred`` to plot only the preferred solution.
         :type option: str, optional
 
         """
-        view = kwargs.get("view", "normal")
+        view = kwargs.get("view", "waveform")
         show = kwargs.get("show", False)
         format = kwargs.get("format","eps")
-        if view == "normal":
+        if view == "waveform":
             option = kwargs.get("option", None)
-            from .imaging.source import plot_waveform_fits
+            from mttime.imaging.source import plot_waveform_fits
             if option == "preferred":
                 tensors = [self.get_preferred_tensor()]
             else:
@@ -558,7 +549,7 @@ class Inversion(object):
             if self.config.event is None:
                 print("Event origin is missing, cannot plot in map view.")
             else:
-                from .imaging.source import beach_map
+                from mttime.imaging.source import beach_map
                 m = self.get_preferred_tensor().m
 
                 args = (
@@ -572,10 +563,13 @@ class Inversion(object):
                 )
                 beach_map(m, *args)
         elif view == "depth":
-            from .imaging.source import beach_mw_depth
+            from mttime.imaging.source import beach_mw_depth
             beach_mw_depth(self.moment_tensors, self.config.event, show, format)
         elif view == "lune":
-            from .imaging.source import plot_lune
+            if self.config.degree != 6:
+                msg = "Full moment tensor is required to generate source-type plot."
+                raise ValueError(msg)
+            from mttime.imaging.source import plot_lune
             mt = self.get_preferred_tensor()
             m = mt.m
             gamma, delta = mt.lune
@@ -587,3 +581,14 @@ class Inversion(object):
         del self.d
         del self.w
 
+    def __str__(self):
+        ret = "\n".join(
+            [self.config.__str__(),
+             "\n| PREFERRED SOLUTION |",
+             self.get_preferred_tensor().__str__()]
+        )
+
+        return ret
+
+    def _repr_pretty_(self, p, cycle):
+        p.text(str(self))
