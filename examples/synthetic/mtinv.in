@@ -8,7 +8,7 @@ green          herrmann
 components     ZRT
 degree         5
 weight         distance
-plot           1
+plot           0
 correlate      0
 station distance azimuth ts npts dt used longitude latitude filter nc np lcrn hcrn model
 BK.FARB.00 110      263 30 100 1.0 0	-123.0011  37.6978  bp 2 2 0.05 0.1  gil7

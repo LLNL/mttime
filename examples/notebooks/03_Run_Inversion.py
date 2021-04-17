@@ -6,28 +6,19 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.5.2
+#       jupytext_version: 1.11.0
 #   kernelspec:
 #     display_name: obspy
 #     language: python
 #     name: obspy
 # ---
 
-# ## Moment Tensor Inversion using `tdmtpy`
+# ## Moment Tensor Inversion using `MTtime`
 #
 # Now we can start the inversion using the input file we created.
 #
 
-# +
-import sys
-import os
-sys.path.insert(0, os.path.abspath('../../src'))
-
-import tdmtpy
-# %matplotlib inline
-
-from IPython.display import Image # to display image files inside the Jupyter notebook
-# -
+import mttime
 
 # #### Let's take a look at mtinv.in
 #
@@ -42,7 +33,7 @@ from IPython.display import Image # to display image files inside the Jupyter no
 # components     ZRT
 # degree         5
 # weight         distance
-# plot           1
+# plot           0
 # correlate      0
 #     station  distance  azimuth  ts  npts   dt  used  longitude  latitude
 #  BK.QRDG.00     80.99   335.29  30   150 1.00     1    -122.14     38.48
@@ -61,7 +52,7 @@ from IPython.display import Image # to display image files inside the Jupyter no
 
 # +
 # Call the Configure object to read the input file and set up the inversion
-config = tdmtpy.Configure(path_to_file="mtinv.in")
+config = mttime.Configure(path_to_file="mtinv.in")
 
 # Quick look at the attributes
 print(config)
@@ -69,29 +60,40 @@ print(config)
 
 # Pass the parameters to the Inversion object and launch the inversion
 # The default is to plot all solutions
-tdmt = tdmtpy.Inversion(config=config)
+tdmt = mttime.Inversion(config=config)
 tdmt.invert()
 
-# You can display the png image files here
-Image(filename="bbwaves.d10.0000.00.png")
-
-# Or turn on interactive display when you call the plotting function
-tdmt.plot(show=True)
-
-# You can also view the results as a function of source depth
-tdmt.plot(view="depth",show=True)
+# ### Figure options
+#  - `view="waveform"` to show the solution and waveform fits.
+#  - `view="depth"` to show solution as a function of source depth.
+#  - `view="map"` plots solution on a map.
+#  - `view="lune"` plots the full moment tensor source-type on a lune.
 
 # +
-# Finally save the results to file: d{depth}mtinv.out
+# To save figure to file set show=False
+
+# Plot waveform fits of the best solution (highest VR)
+tdmt.plot(view="waveform", option="preferred", show=True)
+tdmt.plot(view="depth", show=True)
+tdmt.plot(view="map", show=True)
+# -
+
+# Compute full moment tensor and plot the result on the lune.
+config = mttime.Configure(path_to_file="mtinv.in", degree=6)
+tdmt = mttime.Inversion(config=config)
+tdmt.invert()
+tdmt.plot(view="lune", show=True)
+
+# +
+# Finally save the results to file.
 # Default is to save all the results
 tdmt.write()
-# !cat d12.0000.mtinv.out
 
 # Setting option to 'preferred' will only save the best solution
 tdmt.write(option="preferred")
 # -
 
 # # Find the best solution
-# Make some changes to your input file, such as changing the time shifts, removing bad stations, etc. to get a better solution. Check the solution folder 
+# Make some changes to your input file, such as changing the time shifts, removing bad stations, etc. to get a better solution. Check the solution folder .
 
 
