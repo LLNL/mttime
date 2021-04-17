@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.abspath('../../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'mttime'
-copyright = '2020, Lawrence Livermore National Security, LLC'
+copyright = '2021, Lawrence Livermore National Security, LLC'
 author = 'Andrea Chiang'
 
 # The short X.Y version.

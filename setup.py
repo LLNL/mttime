@@ -62,7 +62,7 @@ if __name__ == "__main__":
         url="https://github.com/LLNL/mttime",
         version=VERSION,
         author="Andrea Chiang",
-        author_email="chiang4@llnl.gov",
+        author_email="andrea@llnl.gov",
         keywords=KEYWORDS,
         long_description_content_type="text/x-rst",
         packages=PACKAGES,
