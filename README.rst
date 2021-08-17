@@ -10,8 +10,8 @@ Requirements
 ------------
 The package was developed on python 3.7 and 3.8, and is running and tested on Mac OSX.
 
-* ObsPy 1.0.* and its dependencies
-* pandas 1.0.*
+* ObsPy and its dependencies
+* pandas
 * cartopy (for plotting maps)
 
 Installation
@@ -40,7 +40,7 @@ the environment where ObsPy and pandas are installed.
    # Build and install mttime
    git clone https://github.com/LLNL/mttime
    cd mttime
-   python setup.py install
+   pip install .
 
 
 Finally, if you want to run the tutorials you will need to install `Jupyter Notebook <https://jupyter.org/install>`_.
