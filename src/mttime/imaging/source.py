@@ -341,8 +341,8 @@ def plot_lune(m, gamma, delta, show, format):
     ax.set_extent([-30, 30, -90, 90], data_crs)
 
     # Add gridlines
-    xlocs = np.arange(-30, 30 + 10, 10, dtype=np.int)
-    ylocs = np.arange(-90, 90 + 10, 10, dtype=np.int)
+    xlocs = np.arange(-30, 30 + 10, 10, dtype=np.int32)
+    ylocs = np.arange(-90, 90 + 10, 10, dtype=np.int32)
     ax.gridlines(xlocs=xlocs, ylocs=ylocs)
 
     # Offset text by mm
@@ -455,7 +455,7 @@ def _new_page(nsta, nrows, ncols, title, annot=None, offset=2):
     ax0.set_axis_off()
 
     # Waveforms
-    ax1 = np.empty((nsta, 3), dtype=np.object)  # create empty axes
+    ax1 = np.empty((nsta, 3), dtype=object)  # create empty axes
     for i in range(nsta):
         ax1[i, 0] = f.add_subplot(gs[i + offset, 0])
         ax1[i, 1] = f.add_subplot(gs[i + offset, 1])

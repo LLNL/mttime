@@ -87,19 +87,19 @@ class Configure(object):
               }
     # station table dtypes
     _df_dtypes = {"station": str,
-                 "distance": np.float,
-                 "azimuth": np.float,
-                 "ts": np.int,
-                 "npts": np.int,
-                 "dt": np.float,
+                 "distance": np.float64,
+                 "azimuth": np.float64,
+                 "ts": np.int32,
+                 "npts": np.int32,
+                 "dt": np.float64,
                  "used": str,
-                 "longitude": np.float,
-                 "latitude": np.float,
+                 "longitude": np.float64,
+                 "latitude": np.float64,
                  "filter": str,  # optional
-                 "nc": np.int,
-                 "np": np.int,
-                 "lcrn": np.float,
-                 "hcrn": np.float,
+                 "nc": np.int32,
+                 "np": np.int32,
+                 "lcrn": np.float64,
+                 "hcrn": np.float64,
                  "model": str
                  }
 
@@ -309,11 +309,11 @@ class Configure(object):
             location += 1
 
         df.drop(columns="used", axis=1, inplace=True)
-        df[self.components] = df[self.components].astype(np.int)
+        df[self.components] = df[self.components].astype(np.int32)
 
         # Indexing linear equations
-        index2 = np.cumsum(np.repeat(df.npts.to_numpy(), self.ncomp), dtype=np.int)
-        index1 = np.zeros(index2.shape, dtype=np.int)
+        index2 = np.cumsum(np.repeat(df.npts.to_numpy(), self.ncomp), dtype=np.int32)
+        index1 = np.zeros(index2.shape, dtype=np.int32)
         index1[1::] = index2[0:-1]
         self.index1 = index1.reshape(self.nsta, self.ncomp)
         self.index2 = index2.reshape(self.nsta, self.ncomp)

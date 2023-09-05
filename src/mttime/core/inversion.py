@@ -174,7 +174,7 @@ class Inversion(object):
         dGm = masked * dGm
         dd = masked * dd
 
-        station_VR = np.zeros((self.config.nsta,), dtype=np.float)
+        station_VR = np.zeros((self.config.nsta,), dtype=np.float64)
         for i in range(self.config.nsta):
             b = self.config.index1[i, 0]
             e = self.config.index2[i, -1]
@@ -402,7 +402,7 @@ class Inversion(object):
 
     def _data_to_d(self):
         # construct data vector according to time shift and sample size
-        d = np.zeros(np.sum(self.config.ncomp * self.config.station_table.npts.values), dtype=np.float)
+        d = np.zeros(np.sum(self.config.ncomp * self.config.station_table.npts.values), dtype=np.float64)
         obs_b = self.config.station_table.ts.values
         obs_e = obs_b + self.config.station_table.npts.values
         for i in range(self.config.nsta):
@@ -437,7 +437,7 @@ class Inversion(object):
          aij coefficients to moment tensor elements
         """
         # Output order: Mxx, Myy, Mzz, Mxy, Mxz, Myz
-        m = np.zeros((6,),dtype=np.float)
+        m = np.zeros((6,),dtype=np.float64)
 
         if self.config.green == "tensor":
             m[3] = a[0]
