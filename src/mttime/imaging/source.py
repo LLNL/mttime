@@ -196,16 +196,25 @@ def beach_mw_depth(tensors, event, show, format):
     ax1.vlines(tensors[np.argmax(vr)].depth, 0, 100, color="black")
     for tensor in tensors:
         ax1.plot(tensor.depth, tensor.total_VR, "o", color=color1)
+        xy = (tensor.depth, tensor.total_VR+10)
         bb = beach(tensor.m,
-                   xy=(0,0),
+                   xy=xy,
                    facecolor=color1,
-                   width=0.25,
+                   width=25,
                    show_iso=True,
+                   axes=None,
                   )
         # Move the beach ball to the right position
-        bb.set_transform(fig.dpi_scale_trans)
-        bb.set_offsets((tensor.depth, tensor.total_VR+10))
-        bb._transOffset = ax1.transData
+        #bb.set_transform(fig.dpi_scale_trans)
+        #bb.set_offsets((tensor.depth, tensor.total_VR+10))
+        #bb._transOffset = ax1.transData
+        # https://github.com/obspy/obspy/issues/2887
+        # Perform aspect ratio hack
+        bb.set_transform(transforms.Affine2D(np.identity(3)))
+        for point in bb._paths:
+            point.vertices -= xy
+        bb.set_offsets(xy)
+        bb.set_offset_transform(ax1.transData)
         ax1.add_collection(bb)
         ax1.tick_params(axis="y", labelcolor=color1)
 
@@ -401,10 +410,17 @@ def plot_lune(m, gamma, delta, show, format):
     ax.plot(x, y, "k-", transform=data_crs)
 
     # Plot source-type
-    bb = beach(m, xy=(0,0), facecolor="red", width=0.25, show_iso=True)
-    bb.set_transform(fig.dpi_scale_trans)
-    bb.set_offsets((gamma, delta))
-    bb._transOffset = ax.transData
+    x, y = projection.transform_point(gamma, delta, data_crs)
+    xy = (x,y)
+    bb = beach(m, xy=(x,y), facecolor="red", width=20, show_iso=True, axes=None)
+    # bb.set_transform(fig.dpi_scale_trans)
+    # bb.set_offsets((gamma, delta))
+    # bb._transOffset = ax.transData
+    bb.set_transform(transforms.Affine2D(np.identity(3)))
+    for point in bb._paths:
+        point.vertices -= xy
+    bb.set_offsets(xy)
+    bb.set_offset_transform(ax.transData)
     ax.add_collection(bb)
     #ax.plot(gamma, delta, "ro", markeredgecolor="k", transform=ccrs.PlateCarree())
 
